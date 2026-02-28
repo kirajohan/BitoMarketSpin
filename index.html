@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BitoMarket SPIN Baza & Skriptlar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        [v-cloak] { display: none; }
+        
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        
+        .modal-enter-active, .modal-leave-active { transition: all 0.3s ease; }
+        .modal-enter-from, .modal-leave-to { opacity: 0; transform: scale(0.95); }
+        
+        .dropdown-enter-active, .dropdown-leave-active { transition: all 0.2s ease; }
+        .dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-10px); }
+
+        /* Skript chizig'i uchun */
+        .script-line::before {
+            content: ''; position: absolute; left: 24px; top: 40px; bottom: -20px; width: 2px; background-color: #e2e8f0; z-index: 0;
+        }
+        .script-item:last-child .script-line::before { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex flex-col">
+    <div id="app" v-cloak class="flex flex-col h-full w-full max-w-[1600px] mx-auto bg-white shadow-2xl relative">
+        
+        <!-- Add Kategoriya Modal -->
+        <transition name="fade">
+            <div v-if="showAddCategoryModal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <transition name="modal">
+                    <div v-if="showAddCategoryModal" class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
+                        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
+                                Yangi Kategoriya
+                            </h3>
+                            <button @click="showAddCategoryModal = false" class="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-1.5 mb-4">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Kategoriya Nomi *</label>
+                                <input type="text" v-model="newCategoryName" placeholder="Masalan: Qurilish mollari" @keyup.enter="saveNewCategory" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+                            </div>
+                        </div>
+                        <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+                            <button @click="showAddCategoryModal = false" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors">Bekor qilish</button>
+                            <button @click="saveNewCategory" class="px-6 py-2.5 rounded-xl font-bold bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition-colors">Yaratish</button>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        </transition>
+
+        <!-- Add Muammo Modal -->
+        <transition name="fade">
+            <div v-if="showAddModal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <transition name="modal">
+                    <div v-if="showAddModal" class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
+                                <svg class="text-blue-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                Yangi Muammo Yaratish
+                            </h3>
+                            <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-4">
+                            <div v-if="formError" class="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-bold border border-red-100 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                {{ formError }}
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-slate-500 uppercase">Kategoriya</label>
+                                    <select v-model="newItem.category" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                                        <option v-for="cat in categories" :value="cat.id" :key="cat.id">{{ cat.name }}</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-slate-500 uppercase">Daraja</label>
+                                    <select v-model="newItem.daraja" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                                        <option value="Kritik">🔥 Kritik</option>
+                                        <option value="Yuqori">⚡ Yuqori</option>
+                                        <option value="O'rta">⚠️ O'rta</option>
+                                        <option value="Past">📉 Past</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Mijoz Muammosi (Sarlavha) *</label>
+                                <input type="text" v-model="newItem.muammo" placeholder="Masalan: Tungi yetkazib berishdagi ustama narxlarni tushuntirish..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Oqibatlar / Simptom *</label>
+                                <textarea v-model="newItem.oqibat" placeholder="Masalan: Mijoz tungi narx qimmatligini tushunmay janjal qiladi..." rows="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium resize-none"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-slate-500 uppercase">Ideal Yechim *</label>
+                                    <textarea v-model="newItem.yechim" placeholder="Vaqtga bog'liq dinamik narx..." rows="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium resize-none"></textarea>
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-blue-500 uppercase">BitoMarket Yechimi *</label>
+                                    <textarea v-model="newItem.bito" placeholder="Tungi 23:00 dan keyin menyu narxlari avtomat o'zgaradi..." rows="2" class="w-full p-3 bg-blue-50/50 border border-blue-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-800 resize-none"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-slate-500 uppercase">Mijoz E'tirozi / To'siq</label>
+                                    <input type="text" v-model="newItem.barer" placeholder="Masalan: Buni kim nazorat qiladi?" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-emerald-600 uppercase">Nega Bito?</label>
+                                    <input type="text" v-model="newItem.nima_uchun" placeholder="Tizim taymer orqali avtomat boshqaradi" class="w-full p-3 bg-emerald-50/50 border border-emerald-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-800">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+                            <button @click="showAddModal = false" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors">Bekor qilish</button>
+                            <button @click="saveNewItem" class="px-6 py-2.5 rounded-xl font-bold bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition-colors">Saqlash</button>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        </transition>
+
+        <!-- Delete Confirmation Modal -->
+        <transition name="fade">
+            <div v-if="showDeleteModal" class="fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <transition name="modal">
+                    <div v-if="showDeleteModal" class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden text-center p-6">
+                        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </div>
+                        <h3 class="text-xl font-black text-slate-800 mb-2">Rostdan ham o'chirasizmi?</h3>
+                        <p class="text-sm text-slate-500 font-medium mb-6">Bu yozuv "Korzinka"ga tushadi. Keyinroq qayta tiklashingiz mumkin.</p>
+                        
+                        <div class="flex gap-3 justify-center">
+                            <button @click="showDeleteModal = false" class="px-5 py-2.5 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors w-full">Yo'q, qolsin</button>
+                            <button @click="confirmDelete" class="px-5 py-2.5 rounded-xl font-bold bg-red-600 text-white shadow-lg shadow-red-200 hover:bg-red-700 transition-colors w-full">Ha, o'chirish</button>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        </transition>
+
+        <!-- Category Delete Confirmation Modal -->
+        <transition name="fade">
+            <div v-if="showDeleteCatModal" class="fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <transition name="modal">
+                    <div v-if="showDeleteCatModal" class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden text-center p-6">
+                        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 11-4 4 4 4"/><path d="M6 15h12a3 3 0 0 0 0-6H6"/></svg>
+                        </div>
+                        <h3 class="text-xl font-black text-slate-800 mb-2">Kategoriyani o'chirish!</h3>
+                        <p class="text-sm text-slate-500 font-medium mb-6">"{{ currentCategoryName }}" bo'limi butunlay o'chib ketadi. Rozimisiz?</p>
+                        
+                        <div class="flex gap-3 justify-center">
+                            <button @click="showDeleteCatModal = false" class="px-5 py-2.5 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors w-full">Bekor qilish</button>
+                            <button @click="confirmDeleteCategory" class="px-5 py-2.5 rounded-xl font-bold bg-red-600 text-white shadow-lg shadow-red-200 hover:bg-red-700 transition-colors w-full">O'chirish</button>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        </transition>
+
+        <!-- Header: Mobile & Desktop -->
+        <header class="bg-white border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 shrink-0 shadow-sm z-30 relative">
+            <div class="flex items-center gap-3 md:gap-4">
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 md:p-2.5 rounded-lg md:rounded-xl text-white shadow-lg shadow-blue-200 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="md:w-6 md:h-6"><path d="M12 2L2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-lg md:text-xl font-extrabold text-slate-800 tracking-tight truncate">BitoMarket SPIN & Skriptlar</h1>
+                    <p class="text-[9px] md:text-[10px] text-blue-600 uppercase tracking-widest font-bold mt-0.5">
+                        <span v-if="!isScriptTab">Jami mavjud: {{ activeItemsCount }} ta muammo</span>
+                        <span v-else>Sotuvchi va Mijoz dialoglari</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto relative">
+                <!-- Add New Button (Faqat SPIN tablarida ko'rinadi) -->
+                <button v-if="!isScriptTab" @click="openAddModal" class="shrink-0 flex items-center justify-center gap-1.5 bg-blue-600 text-white px-3 md:px-4 py-2.5 md:py-2 rounded-xl md:rounded-full text-xs md:text-sm font-bold shadow-md shadow-blue-200 hover:bg-blue-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    <span class="hidden md:inline">Yangi Qo'shish</span>
+                </button>
+
+                <div v-if="!isScriptTab" class="relative group w-full md:w-[320px]">
+                    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors z-10" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    
+                    <input 
+                        type="text" 
+                        v-model="searchTerm"
+                        @focus="showSearchDropdown = true"
+                        @blur="hideDropdown"
+                        :placeholder="activeTab === 'hidden' ? 'Yashiringanlardan...' : (activeTab === 'trash' ? 'Korzinkadan...' : 'Qidirish...')" 
+                        class="pl-10 pr-4 py-2.5 md:py-2 bg-slate-100/80 border border-slate-200 focus:border-blue-300 focus:bg-white rounded-xl md:rounded-full text-sm focus:ring-4 focus:ring-blue-50 transition-all outline-none w-full shadow-inner placeholder-slate-400 font-medium relative z-10"
+                    />
+
+                    <!-- Dinamik Autocomplete Dropdown -->
+                    <transition name="dropdown">
+                        <div v-if="searchTerm && showSearchDropdown && filteredData.length > 0" 
+                             class="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 max-h-[60vh] md:max-h-80 overflow-y-auto z-50 custom-scrollbar flex flex-col">
+                            <div class="px-4 py-2 bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Natijalar: {{ filteredData.length }} ta</p>
+                            </div>
+                            <ul class="py-1">
+                                <li v-for="item in filteredData" :key="item.uid"
+                                    @mousedown="selectSearchItem(item)"
+                                    class="px-4 py-3 hover:bg-blue-50 cursor-pointer flex flex-col gap-1.5 border-b border-slate-50 last:border-0 transition-colors">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <span class="text-sm font-bold text-slate-800 leading-tight">{{ item.muammo }}</span>
+                                        <span :class="['shrink-0 px-2 py-0.5 rounded text-[9px] font-black uppercase', 
+                                              item.daraja === 'Kritik' ? 'bg-red-50 text-red-600' : (item.daraja === 'Yuqori' ? 'bg-orange-50 text-orange-600' : 'bg-slate-100 text-slate-600')]">
+                                            {{ item.daraja }}
+                                        </span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </transition>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="flex flex-col md:flex-row overflow-hidden flex-grow relative bg-[#F8FAFC]">
+            
+            <!-- Sidebar -->
+            <aside class="w-full md:w-72 bg-white border-b md:border-r border-slate-200 shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 flex flex-col">
+                <nav class="flex flex-row md:flex-col p-3 md:p-4 gap-2 md:gap-1.5 overflow-x-auto hide-scrollbar scroll-smooth w-full flex-grow">
+                    
+                    <!-- SKRIPTLAR BO'LIMI -->
+                    <div class="hidden md:flex items-center justify-between px-3 mb-2 mt-1">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Sotuv Skriptlari</p>
+                    </div>
+                    <button
+                        @click="changeTab('hotCall')"
+                        :class="['flex shrink-0 md:w-full items-center px-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-sm font-bold transition-all duration-200 whitespace-nowrap', 
+                                activeTab === 'hotCall' ? 'bg-orange-500 text-white shadow-lg shadow-orange-200 md:scale-[1.02]' : 'bg-orange-50 md:bg-transparent text-slate-600 hover:bg-orange-100']"
+                    >
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <span :class="activeTab === 'hotCall' ? 'text-orange-200' : 'text-orange-500'">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><path d="M15.5 3c2 0 5.5 1.5 5.5 5.5 0 3-3 4-3 4s3.5-1 3.5-4C21.5 4 18 2 15.5 2"/></svg>
+                            </span>
+                            Hot Call (Iliq mijoz)
+                        </div>
+                    </button>
+                    <button
+                        @click="changeTab('coldCall')"
+                        :class="['flex shrink-0 md:w-full items-center px-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-sm font-bold transition-all duration-200 whitespace-nowrap', 
+                                activeTab === 'coldCall' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-200 md:scale-[1.02]' : 'bg-cyan-50 md:bg-transparent text-slate-600 hover:bg-cyan-100']"
+                    >
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <span :class="activeTab === 'coldCall' ? 'text-cyan-200' : 'text-cyan-500'">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><path d="m14 3 3 3-3 3"/><path d="M17 6h4"/></svg>
+                            </span>
+                            Cold Call (Sovuq baza)
+                        </div>
+                    </button>
+
+                    <div class="h-px bg-slate-200 my-2 mx-2 hidden md:block"></div>
+
+                    <!-- KATEGORIYALAR -->
+                    <div class="hidden md:flex items-center justify-between px-3 mb-2 mt-2">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Kategoriyalar</p>
+                        <!-- Kategoriya qo'shish tugmasi -->
+                        <button @click="showAddCategoryModal = true" class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-1 rounded transition-colors" title="Kategoriya qo'shish">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        </button>
+                    </div>
+                    
+                    <button
+                        v-for="cat in categories"
+                        :key="cat.id"
+                        @click="changeTab(cat.id)"
+                        :class="['flex shrink-0 md:w-full items-center md:justify-between px-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-sm font-bold transition-all duration-200 whitespace-nowrap', 
+                                activeTab === cat.id ? 'bg-blue-600 text-white shadow-md shadow-blue-200 md:scale-[1.02]' : 'bg-slate-50 md:bg-transparent text-slate-600 hover:bg-slate-100']"
+                    >
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <span :class="activeTab === cat.id ? 'text-blue-100' : 'text-slate-400'" v-html="cat.icon"></span>
+                            {{ cat.name }}
+                        </div>
+                        <div class="hidden md:flex items-center gap-2">
+                            <span :class="['text-[10px] px-2 py-0.5 rounded-full', activeTab === cat.id ? 'bg-blue-500/50 text-white' : 'bg-slate-100 text-slate-400']">
+                                {{ getActiveCount(cat.id) }}
+                            </span>
+                        </div>
+                        <span v-if="activeTab === cat.id" class="md:hidden ml-2 bg-white/20 px-1.5 py-0.5 rounded text-[10px]">{{ getActiveCount(cat.id) }}</span>
+                    </button>
+
+                    <div class="h-px bg-slate-200 my-2 mx-2 hidden md:block"></div>
+                    
+                    <!-- Yashiringanlar tugmasi -->
+                    <button
+                        @click="changeTab('hidden')"
+                        :class="['flex shrink-0 md:w-full items-center md:justify-between px-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-sm font-bold transition-all duration-200 whitespace-nowrap', 
+                                activeTab === 'hidden' ? 'bg-slate-700 text-white shadow-lg' : 'bg-slate-100 md:bg-slate-50 text-slate-600 hover:bg-slate-200']"
+                    >
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <span :class="activeTab === 'hidden' ? 'text-slate-300' : 'text-slate-400'">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+                            </span>
+                            Yashiringanlar
+                        </div>
+                        <div class="hidden md:flex items-center gap-2">
+                            <span :class="['text-[10px] px-2 py-0.5 rounded-full', activeTab === 'hidden' ? 'bg-slate-500 text-white' : 'bg-slate-200 text-slate-500']">
+                                {{ hiddenItemIds.length }}
+                            </span>
+                        </div>
+                        <span v-if="activeTab === 'hidden'" class="md:hidden ml-2 bg-white/20 px-1.5 py-0.5 rounded text-[10px]">{{ hiddenItemIds.length }}</span>
+                    </button>
+
+                    <!-- Korzinka tugmasi -->
+                    <button
+                        @click="changeTab('trash')"
+                        :class="['flex shrink-0 md:w-full items-center md:justify-between px-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-sm font-bold transition-all duration-200 whitespace-nowrap mt-2 md:mt-1', 
+                                activeTab === 'trash' ? 'bg-red-600 text-white shadow-lg shadow-red-200' : 'bg-red-50 text-red-600 hover:bg-red-100']"
+                    >
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <span :class="activeTab === 'trash' ? 'text-red-200' : 'text-red-400'">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            </span>
+                            Korzinka
+                        </div>
+                        <div class="hidden md:flex items-center gap-2">
+                            <span :class="['text-[10px] px-2 py-0.5 rounded-full', activeTab === 'trash' ? 'bg-red-500 text-white' : 'bg-red-100 text-red-500']">
+                                {{ deletedItemIds.length }}
+                            </span>
+                        </div>
+                        <span v-if="activeTab === 'trash'" class="md:hidden ml-2 bg-white/20 px-1.5 py-0.5 rounded text-[10px]">{{ deletedItemIds.length }}</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Content Area -->
+            <main class="flex-grow overflow-y-auto p-3 md:p-8 custom-scrollbar relative">
+                
+                <!-- SCRIPT BUILDER VIEW (Whimsical style) -->
+                <div v-if="isScriptTab" class="max-w-4xl mx-auto pb-32">
+                    <div class="mb-8 pl-1 md:pl-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                                {{ activeTab === 'hotCall' ? '🔥 Hot Call Skripti' : '❄️ Cold Call Skripti' }}
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-2 font-medium">Bloklar orqali sotuv jarayonini chizib chiqing.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative space-y-6">
+                        <div v-for="(block, index) in scripts[activeTab]" :key="block.id" class="script-item relative pl-12 md:pl-16">
+                            
+                            <!-- Birlashtiruvchi chiziq (Whimsical line) -->
+                            <div class="script-line absolute left-0 top-0 bottom-0">
+                                <!-- Doiracha -->
+                                <div class="absolute left-[20px] top-[24px] w-3 h-3 rounded-full border-2 bg-white z-10"
+                                     :class="block.role === 'seller' ? 'border-blue-500' : 'border-slate-400'"></div>
+                            </div>
+
+                            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md"
+                                 :class="block.role === 'seller' ? 'border-blue-200 ml-0 md:mr-12' : 'border-slate-200 mr-0 md:ml-12'">
+                                
+                                <!-- Sarlavha / Role qismi -->
+                                <div class="px-4 py-3 flex justify-between items-center border-b"
+                                     :class="block.role === 'seller' ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'">
+                                    
+                                    <div class="flex items-center gap-3">
+                                        <select v-model="block.role" class="bg-transparent font-black uppercase tracking-widest text-[10px] outline-none cursor-pointer"
+                                                :class="block.role === 'seller' ? 'text-blue-700' : 'text-slate-600'">
+                                            <option value="seller">Sotuvchi (Biz)</option>
+                                            <option value="client">Mijoz (Ular)</option>
+                                        </select>
+                                    </div>
+
+                                    <button @click="deleteScriptBlock(activeTab, index)" class="text-slate-400 hover:text-red-500 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </div>
+
+                                <!-- Text qismi -->
+                                <div class="p-4 bg-white">
+                                    <textarea v-model="block.text" 
+                                              placeholder="Matnni bu yerga yozing..." 
+                                              rows="2" 
+                                              oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
+                                              class="w-full resize-none outline-none font-medium text-slate-700 bg-transparent placeholder-slate-300"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Yangi qo'shish tugmasi (Skript) -->
+                        <div class="pl-12 md:pl-16 mt-8 relative">
+                            <!-- Oxirgi chiziq tugashi -->
+                            <div class="absolute left-[20px] top-[-24px] bottom-[50%] w-0.5 bg-slate-200"></div>
+                            <button @click="addScriptBlock(activeTab)" class="flex items-center gap-2 bg-white border-2 border-dashed border-slate-300 text-slate-500 hover:border-blue-400 hover:text-blue-600 font-bold px-6 py-3 rounded-2xl w-full justify-center transition-colors shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                Yangi qadam qo'shish
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SPIN DATA VIEW -->
+                <div v-else class="max-w-6xl mx-auto pb-24 md:pb-10">
+                    <div class="mb-4 md:mb-8 pl-1 md:pl-0 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <h2 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                                    {{ currentCategoryName }}
+                                </h2>
+                                <p class="text-xs md:text-sm text-slate-500 mt-1.5 font-medium">Ushbu ro'yxatda: <span :class="activeTab === 'trash' ? 'text-red-600' : 'text-blue-600'" class="font-bold">{{ filteredData.length }}</span> ta muammo</p>
+                            </div>
+                            <!-- Kategoriyani o'chirish tugmasi -->
+                            <button v-if="activeTab !== 'umum' && activeTab !== 'hidden' && activeTab !== 'trash' && activeTab !== 'umumiy'" 
+                                    @click="showDeleteCatModal = true" 
+                                    class="text-red-400 hover:text-red-600 bg-red-50 p-2 rounded-xl border border-red-100 hover:border-red-200 transition-colors ml-2 mt-1" title="Kategoriyani o'chirish">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 md:gap-6">
+                        
+                        <!-- UMUMIY BO'LIM (Jadval / Mobile Cards) -->
+                        <div v-if="activeTab === 'umumiy' && filteredData.length > 0" class="bg-white rounded-[20px] md:rounded-[24px] shadow-sm border border-slate-200 overflow-hidden">
+                            <!-- Desktop view -->
+                            <div class="hidden lg:block overflow-x-auto custom-scrollbar">
+                                <table class="w-full text-left border-collapse min-w-[950px]">
+                                    <thead class="bg-slate-50/80 border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[30%]">Mijoz Muammosi</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[30%]">Belgisi / Oqibati</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[25%]">Raqamli Yechim</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-[15%]">Harakatlar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <tr v-for="row in filteredData" :key="row.uid" class="hover:bg-blue-50/30 transition-colors group">
+                                            <td class="px-6 py-4"><p class="text-sm font-bold text-slate-800">{{ row.muammo }}</p></td>
+                                            <td class="px-6 py-4">
+                                                <p class="text-sm font-medium text-slate-600">{{ row.belgi }}</p>
+                                                <p class="text-[11px] font-bold text-red-500 mt-1">Oqibat: {{ row.ta_sir || row.oqibat }}</p>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-blue-600 font-bold bg-blue-50/10">{{ row.yechim }}</td>
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex flex-col items-center gap-3">
+                                                    <span :class="['px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider', row.daraja === 'Kritik' ? 'bg-red-50 text-red-600' : (row.daraja === 'Yuqori' ? 'bg-orange-50 text-orange-600' : 'bg-slate-100 text-slate-600')]">
+                                                        {{ row.daraja }}
+                                                    </span>
+                                                    
+                                                    <div class="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <!-- Switch Tugmasi -->
+                                                        <button @click="toggleHide(row)" :class="isHidden(row) ? 'bg-slate-200' : 'bg-blue-600'" title="Ko'rsatish/Yashirish" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out">
+                                                          <span :class="isHidden(row) ? 'translate-x-0' : 'translate-x-4'" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                                        </button>
+                                                        <!-- O'chirish Tugmasi -->
+                                                        <button @click="initDelete(row)" title="O'chirish" class="text-slate-400 hover:text-red-600 bg-white hover:bg-red-50 p-1.5 rounded-lg border border-slate-200 hover:border-red-200 transition-all">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Mobile view (Umumiy) -->
+                            <div class="block lg:hidden divide-y divide-slate-100">
+                                <div v-for="row in filteredData" :key="row.uid" class="p-4 md:p-5 relative">
+                                    <div class="flex justify-between items-start gap-2 mb-2 pr-12">
+                                        <h4 class="text-base font-bold text-slate-800">{{ row.muammo }}</h4>
+                                        <span :class="['shrink-0 px-2 py-0.5 rounded text-[9px] font-black uppercase mt-1 border', row.daraja === 'Kritik' ? 'bg-red-50 border-red-200 text-red-600' : (row.daraja === 'Yuqori' ? 'bg-orange-50 border-orange-200 text-orange-600' : 'bg-slate-50 border-slate-200 text-slate-600')]">
+                                            {{ row.daraja }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs font-semibold text-slate-600 pr-10">Simptom: <span class="font-normal">{{ row.belgi }}</span></p>
+                                    <p class="text-xs font-semibold text-red-500 mt-1 pr-10">Oqibat: <span class="font-normal">{{ row.ta_sir || row.oqibat }}</span></p>
+                                    <div class="mt-3 p-3 bg-blue-50/50 rounded-xl border border-blue-100 mr-2">
+                                        <p class="text-[10px] font-bold text-blue-400 uppercase mb-1">Yechim</p>
+                                        <p class="text-sm font-bold text-blue-700">{{ row.yechim }}</p>
+                                    </div>
+                                    
+                                    <!-- Mobile Harakatlar -->
+                                    <div class="absolute top-4 right-4 flex flex-col items-center gap-2">
+                                        <button @click="toggleHide(row)" :class="isHidden(row) ? 'bg-slate-200' : 'bg-blue-600'" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out">
+                                            <span :class="isHidden(row) ? 'translate-x-0' : 'translate-x-5'" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                        </button>
+                                        <button @click="initDelete(row)" class="text-slate-400 hover:text-red-600 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CARDS FOR ALL OTHER SECTORS & HIDDEN/TRASH TABS -->
+                        <div v-else v-for="item in filteredData" :key="item.uid" :class="['bg-white rounded-[20px] md:rounded-[24px] p-5 md:p-8 border transition-all relative overflow-hidden', isHidden(item) && activeTab !== 'trash' ? 'shadow-inner border-slate-300 bg-slate-50/50 opacity-90' : 'shadow-[0_2px_10px_rgba(0,0,0,0.03)] border-slate-200 hover:shadow-lg', activeTab === 'trash' ? 'border-red-200 bg-red-50/30' : '']">
+                            
+                            <!-- Action Buttons on Card (Top Right) -->
+                            <div class="absolute top-5 right-5 md:top-6 md:right-6 flex flex-col items-end gap-2 z-10">
+                                
+                                <!-- Normal or Hidden Tab Controls -->
+                                <template v-if="activeTab !== 'trash'">
+                                    <div class="flex items-center gap-2">
+                                        <button @click="initDelete(item)" class="text-slate-400 hover:text-red-600 bg-white hover:bg-red-50 p-2 rounded-xl border border-slate-200 hover:border-red-200 transition-all shadow-sm group">
+                                            <svg class="group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                        </button>
+                                        <button @click="toggleHide(item)" :class="isHidden(item) ? 'bg-slate-300' : 'bg-blue-600'" class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out shadow-sm">
+                                            <span :class="isHidden(item) ? 'translate-x-0' : 'translate-x-5'" class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                        </button>
+                                    </div>
+                                    <span :class="isHidden(item) ? 'text-slate-500' : 'text-blue-500'" class="text-[9px] font-black uppercase tracking-widest mt-1">{{ isHidden(item) ? 'Qaytarish' : 'Yashirish' }}</span>
+                                </template>
+                                
+                                <!-- Trash Tab Controls -->
+                                <template v-if="activeTab === 'trash'">
+                                    <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                                        <button @click="restoreItem(item)" class="flex items-center gap-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                            Tiklash
+                                        </button>
+                                        <button @click="permanentDelete(item)" class="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-md transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                            Butunlay yo'qotish
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="flex flex-col mb-4 md:mb-6 pr-24 md:pr-32">
+                                <span :class="['w-max px-2.5 py-1 rounded-md text-[9px] md:text-[10px] font-black uppercase tracking-widest border mb-3', item.daraja === 'Kritik' ? 'bg-red-50 text-red-600 border-red-200' : (item.daraja === 'Yuqori' ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-slate-50 text-slate-500 border-slate-200')]">
+                                    {{ item.daraja === 'Kritik' ? '🔥 Kritik' : (item.daraja === 'Yuqori' ? '⚡ Yuqori' : '⚠️ O\'rta / Past') }}
+                                </span>
+                                <h3 :class="['text-lg md:text-2xl font-black leading-snug', isHidden(item) && activeTab !== 'trash' ? 'text-slate-500 line-through' : 'text-slate-800']">{{ item.muammo }}</h3>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-5 mb-5 md:mb-6" :class="{'opacity-75 grayscale-[30%]': isHidden(item) && activeTab !== 'trash'}">
+                                <div class="bg-red-50 p-4 md:p-5 rounded-[16px] border border-red-100/50">
+                                    <p class="text-[9px] md:text-[10px] font-black text-red-400 uppercase mb-1.5 md:mb-2 flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                        Oqibatlar / Simptom
+                                    </p>
+                                    <p class="text-xs md:text-sm font-semibold text-slate-800">{{ item.oqibat || (item.belgi + ' — ' + item.ta_sir) }}</p>
+                                </div>
+                                <div class="bg-slate-50 p-4 md:p-5 rounded-[16px] border border-slate-100">
+                                    <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase mb-1.5 md:mb-2">Ideal Yechim</p>
+                                    <p class="text-xs md:text-sm text-slate-600 font-medium">{{ item.yechim }}</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 md:p-5 rounded-[16px] text-white shadow-lg shadow-blue-100/50">
+                                    <p class="text-[9px] md:text-[10px] font-black text-blue-200 uppercase mb-1.5 md:mb-2">Raqamli Yechim (Bito)</p>
+                                    <p class="text-xs md:text-sm font-bold">{{ item.bito || 'Maxsus CRM yoki IT arxitektura orqali avtomatlashadi' }}</p>
+                                </div>
+                            </div>
+                            
+                            <div v-if="item.barer || item.nima_uchun" :class="{'opacity-75': isHidden(item) && activeTab !== 'trash'}" class="flex flex-col md:flex-row justify-between gap-3 pt-4 border-t border-slate-100 bg-slate-50/50 -mx-5 md:-mx-8 -mb-5 md:-mb-8 p-5 md:p-6 rounded-b-[20px] md:rounded-b-[24px]">
+                                <div class="flex items-start gap-2 md:items-center">
+                                    <div class="bg-amber-100/80 p-1.5 rounded text-amber-600 shrink-0 mt-0.5 md:mt-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    </div>
+                                    <p class="text-xs text-slate-500 leading-tight">Mijoz e'tirozi:<br class="md:hidden"/><b class="text-slate-700 ml-1 md:ml-2">{{ item.barer || '-' }}</b></p>
+                                </div>
+                                <div class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 md:px-4 py-2 rounded-xl border border-emerald-100 w-full md:w-auto mt-2 md:mt-0">
+                                    <svg class="shrink-0 text-emerald-500" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    <div>
+                                        <p class="text-[8px] md:text-[9px] font-black uppercase text-emerald-600/70 mb-0.5">Nega aynan Bito?</p>
+                                        <p class="text-xs font-bold leading-tight">{{ item.nima_uchun || 'Tayyor Enterprise arxitekturasi' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div v-if="filteredData.length === 0" class="py-16 md:py-24 text-center bg-white rounded-3xl border border-dashed border-slate-300 mx-1 md:mx-0">
+                            <div :class="['w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-4', activeTab === 'trash' ? 'bg-red-50 text-red-300' : 'bg-slate-50 text-slate-300']">
+                                <svg v-if="activeTab === 'trash'" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                <svg v-else xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            </div>
+                            <h3 class="text-base md:text-lg font-bold text-slate-800">
+                                {{ activeTab === 'hidden' ? "Sizda yashirilgan muammolar yo'q" : (activeTab === 'trash' ? "Korzinka bo'm-bo'sh" : "Ushbu bo'limda ma'lumot topilmadi") }}
+                            </h3>
+                            <p v-if="activeTab !== 'trash'" class="text-slate-500 mt-1 md:mt-2 text-xs md:text-sm">Boshqa so'z bilan qidirib ko'ring yoki yangi qo'shing</p>
+                            <div class="flex justify-center gap-3 mt-4">
+                                <button v-if="searchTerm" @click="searchTerm = ''; showSearchDropdown = false" class="text-slate-600 font-bold text-xs md:text-sm bg-slate-100 px-4 py-2.5 rounded-xl hover:bg-slate-200 transition-colors">
+                                    Qidiruvni tozalash
+                                </button>
+                                <button v-if="activeTab !== 'trash' && activeTab !== 'hidden'" @click="openAddModal" class="text-blue-600 font-bold text-xs md:text-sm bg-blue-50 px-4 py-2.5 rounded-xl hover:bg-blue-100 transition-colors">
+                                    + Yangi Qo'shish
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    activeTab: 'umumiy',
+                    searchTerm: '',
+                    showSearchDropdown: false,
+                    
+                    // State
+                    hiddenItemIds: [],
+                    deletedItemIds: [],
+                    
+                    // Modals
+                    showAddModal: false,
+                    showDeleteModal: false,
+                    showAddCategoryModal: false,
+                    showDeleteCatModal: false,
+
+                    itemToDelete: null,
+                    formError: '',
+                    newCategoryName: '',
+                    
+                    // Form object
+                    newItem: {
+                        category: 'umumiy',
+                        daraja: 'Kritik',
+                        muammo: '', oqibat: '', yechim: '', bito: '', barer: '', nima_uchun: ''
+                    },
+
+                    // SKRIPTLAR UCHUN BAZA
+                    scripts: {
+                        hotCall: [
+                            { id: 1, role: 'seller', text: 'Assalomu alaykum, ismingiz [Mijoz ismi] mi? Men BitoMarket savdo bo\'limidan bezovta qilyapman.' },
+                            { id: 2, role: 'client', text: 'Va alaykum assalom. Ha, eshitaman.' },
+                            { id: 3, role: 'seller', text: 'Siz bizning sahifamizda [X tovar] ni ko\'rib, savatga qo\'shib qo\'ygan ekansiz. Buyurtmani rasmiylashtirishga yordam beraymi yoki savollaringiz bormi?' }
+                        ],
+                        coldCall: [
+                            { id: 1, role: 'seller', text: 'Assalomu alaykum! Men BitoMarket tizimidan [Sotuvchi ismi] bo\'laman. Sizning do\'koningizni Instagramda ko\'rib chiqdik va savdoni avtomatlashtirish bo\'yicha bir taklifimiz bor edi. 1 daqiqa vaqtingizni ajrata olasizmi?' },
+                            { id: 2, role: 'client', text: 'Hozir vaqtim yo\'qroq edi, nimada edi?' },
+                            { id: 3, role: 'seller', text: 'Tushunaman. Men faqatgina Directdagi xaoslarni yo\'qotib, xaridni 1 daqiqada tugatadigan telegram katalog haqida aytmoqchi edim. Sizga buni namunasini Telegramdan tashlab qo\'ysam ko\'rib chiqa olasizmi?' }
+                        ]
+                    },
+
+                    categories: [
+                        { id: 'umumiy', name: "Umumiy SPIN", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
+                        { id: 'mobil', name: "Mobil & Texno", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>' },
+                        { id: 'restoran', name: "Restoran & Kafe", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>' },
+                        { id: 'beauty', name: "Go'zallik", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>' },
+                        { id: 'med', name: "Tibbiyot & BFQ", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>' },
+                        { id: 'parfum', name: "Parfyumeriya", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>' },
+                        { id: 'kiyim', name: "Kiyim & Poyabzal", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>' },
+                        { id: 'elektronika', name: "Texnika", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
+                        { id: 'mebel', name: "Mebel & Uy", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 14v6"/><path d="M22 14v6"/><path d="M2 16h20"/><path d="M4 14v-2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/></svg>' },
+                        { id: 'bolalar', name: "Bolalar Tovari", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>' },
+                        { id: 'avto', name: "Avtotovarlar", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a2 2 0 0 0-1.6-.8H9.3a2 2 0 0 0-1.6.8L5 11l-5.16.86a1 1 0 0 0-.84.99V16h3m4 0a2 2 0 1 0 4 0m-8 0a2 2 0 1 0 4 0"/></svg>' },
+                        { id: 'supermarket', name: "Supermarket", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>' }
+                    ],
+                    data: {
+                        umumiy: [
+                            { muammo: "Trafik bor, sotuv yo'q (CR past)", belgi: "CR < 2%, Faqat ko'rib chiqib ketish", ta_sir: "Reklama puli yonadi", yechim: "UX audit, ishonch elementlari", daraja: "Kritik" },
+                            { muammo: "Savat tashlab ketish (Checkout drop)", belgi: "60%+ xaridor to'lov bosqichida ketadi", ta_sir: "Yo'qotilgan real daromad", yechim: "1-klik checkout, eslatma bot (Follow-up)", daraja: "Kritik" },
+                            { muammo: "Sekin sayt va platforma", belgi: "3+ sek yuklanish, qotib qolish", ta_sir: "Bounce rate oshadi, asabiy mijozlar", yechim: "Telegram MiniApp yoki tezkor CDN", daraja: "Yuqori" },
+                            { muammo: "Ishonch pastligi (Otziv yo'q)", belgi: "Odamlar poddelkadan yoki aldanib qolishdan qo'rqadi", ta_sir: "Sotuvga katta qarshilik", yechim: "Real review moduli, SSL, kafolat sahifasi", daraja: "Yuqori" },
+                            { muammo: "Reklama ROI past (CAC yuqori)", belgi: "1 ta mijoz topish juda qimmat", ta_sir: "Sof foyda kamayadi", yechim: "Retargeting va mijoz ushlab qolish tizimi", daraja: "Kritik" },
+                            { muammo: "Takroriy mijoz (LTV) yo'qligi", belgi: "Mijoz faqat 1 marta xarid qiladi", ta_sir: "Reklamaga doimiy og'ir xarajat", yechim: "Loyalty (Sodiqlik) dasturi, Cashback", daraja: "Kritik" },
+                            { muammo: "CRM va mijozlar bazasi yo'qligi", belgi: "Mijozlar raqami Excelda yoki bloknotda tarqoq", ta_sir: "Auditoriyani yo'qotish va nazoratsizlik", yechim: "Avtomatlashgan CRM va teglash tizimi", daraja: "Yuqori" },
+                            { muammo: "Ombor nazorati va qoldiq chalkashligi", belgi: "Sotilgan tovar amalda yo'q (Out-of-stock)", ta_sir: "Mijozga pul qaytarish, negativ", yechim: "Online/Offline yagona sinxronlashgan baza", daraja: "Kritik" },
+                            { muammo: "Qaytarish (Vozvrat) ko'pligi", belgi: "Tovarning rasmiga mos kelmasligi", ta_sir: "Ikki barobar logistika xarajati", yechim: "Batafsil tavsif, video sharhlar vitrinasi", daraja: "Yuqori" },
+                            { muammo: "Yetkazib berish (Logistika) muammolari", belgi: "Kuryer kechikishi, mijozning kutib qolishi", ta_sir: "Salbiy fikr va mijozni yo'qotish", yechim: "Buyurtma statusi va kuryer nazorati API", daraja: "Yuqori" },
+                            { muammo: "Valyuta kursi va narxlarni yangilash azobi", belgi: "Yuzlab tovar narxi kurs sakraganda xato qoladi", ta_sir: "Zarariga sotish yoki kechasi bilan tahrirlash", yechim: "Ommaviy narx boshqaruvi (Mass update)", daraja: "Kritik" },
+                            { muammo: "O'rtacha chek pastligi (AOV)", belgi: "Har bir xariddan tushum kichik", ta_sir: "Kichik marja", yechim: "Upsell / Cross-sell (Tavsiya tizimi)", daraja: "O'rta" },
+                            { muammo: "Zaif mahsulot kartochkasi", belgi: "Faqat 1 ta rasm va narx bor xolos", ta_sir: "Past CTR, savdo pasayishi", yechim: "Batafsil matn, sifatli UI/UX dizayn", daraja: "O'rta" },
+                            { muammo: "Ijtimoiy tarmoqlar (Insta/FB) bloklanishi xavfi", belgi: "Shadowban yoki akkaunt bloklanishi qo'rquvi", ta_sir: "Butun biznesni nolga tushishi", yechim: "Mustaqil va bloklanmaydigan shaxsiy do'kon", daraja: "Kritik" },
+                            { muammo: "Chegirmalarga to'liq qaramlik", belgi: "Mijoz faqat chegirma e'lon qilinganda keladi", ta_sir: "Biznes foydasiz ishlaydi", yechim: "Eksklyuzivlik va yopiq klub (Promo) tizimi", daraja: "Yuqori" },
+                            { muammo: "Xodimlar va kassadagi o'g'riliklar", belgi: "Kassadagi kamomad (nedostacha)", ta_sir: "Foydani bevosita o'g'irlatish", yechim: "To'liq raqamli invoys va kassa hisobi", daraja: "Kritik" },
+                            { muammo: "Oflayn zallardagi navbatlar", belgi: "Kutishdan charchab chiqib ketadigan odamlar", ta_sir: "Pik soatlardagi sof zarar", yechim: "QR kod order orqali navbatsiz mustaqil xarid", daraja: "Yuqori" },
+                            { muammo: "Mijozlarning turli tillarda murojaat qilishi", belgi: "Menejerning rus/o'zbek tilida xatosi", ta_sir: "Tushunmovchilik sabab mijoz ketishi", yechim: "Ko'p tilli (Multilang) avto-interfeys", daraja: "O'rta" },
+                            { muammo: "To'lov tizimlari ishonchsizligi", belgi: "Mijoz kartaga pul o'tkazishdan qo'rqadi", ta_sir: "Sotuvni oxirgi bosqichda sinishi", yechim: "Rasmiy Payme/Click billing integratsiyasi", daraja: "Yuqori" },
+                            { muammo: "Direct-dagi xaos va xabarlarni yo'qotish", belgi: "Menejer ulgurmaydi, xabarlar o'qilmay qoladi", ta_sir: "Issiq mijoz sovuydi va konkurentga o'tadi", yechim: "Menejerlarsiz 24/7 avtonom bot tizimi", daraja: "Kritik" },
+                            { muammo: "Iste'molchi terrorizmi (Kiyib qaytarish)", belgi: "Mijoz to'yda kiyib, ertasi kuni qaytarishi", ta_sir: "Vozvrat va tovarning yaroqsiz bo'lishi", yechim: "Raqamli ommaviy oferta va shartlar ekrani", daraja: "Yuqori" }
+                        ],
+                        mobil: [
+                            { daraja: "Kritik", muammo: "Yangi modellar uchun to'g'ri chexol topish azobi", oqibat: "Mijoz 'bu menga tushadimi' deb izlab oxiri chiqib ketadi", yechim: "Aqlli qidiruv (Model bo'yicha)", bito: "Qidiruvga S24 yozilsa, faqat unga mos narsalar chiqadi", barer: "Bazani to'ldirish", nima_uchun: "Tovarlarni ommaviy Excel orqali teglab yuklash mumkin" },
+                            { daraja: "Yuqori", muammo: "Kafolat (garantiya) talonlarining yo'qolishi", oqibat: "Mijoz bilan tortishuv va janjallar (Mening garantiyam bor edi deb)", yechim: "Raqamli xarid tarixi", bito: "Mijoz profilida qachon olingani va kafolati avtomatik saqlanadi", barer: "Ro'yxatdan o'tish", nima_uchun: "Telegramda avtorizatsiya 1 sekundda o'tkazadi" },
+                            { daraja: "Yuqori", muammo: "Rasm/video jo'natishda menejer suratkashga aylanishi", oqibat: "Xodim mijoz bilan ishlash o'rniga faqat rasm qidirib vaqt sarflaydi", yechim: "Tayyor vizual vitrina", bito: "Mijoz o'zi MiniApp da mahsulotning barcha videosharlarni ko'radi", barer: "Rasmlar qotishi", nima_uchun: "BitoMarket rasmlarni CDN orqali eng tezkor formatda ochadi" },
+                            { daraja: "Kritik", muammo: "Original vs Poddelka ajratish muammosi", oqibat: "Arzon Xitoy narsasi deb o'ylab, xariddan voz kechish", yechim: "Ishonch va sifat emblemalari", bito: "Mahsulot nomida '100% Original' yorliqlari (Badge) tirkash imkoni", barer: "Isboti nima", nima_uchun: "Mijozlar otzivi va mahsulot sertifikati rasmi to'g'ridan to'g'ri biriktiriladi" },
+                            { daraja: "Yuqori", muammo: "Aksessuarlar mosligini adashtirish (Kopiya vs Original)", oqibat: "Mijoz AirPods nusxasini original deb o'ylab tortishishi", yechim: "Aniq modifikatorlar (Copy / Orig)", bito: "Tovar tanlashda mijoz sifat darajasini o'zi bosib belgilaydi", barer: "O'qimaydi", nima_uchun: "Modifikatorni bosmasa savatga qoshilmaydi (majburiy tanlov)" }
+                        ],
+                        restoran: [
+                            { daraja: "Kritik", muammo: "Agregatorlar (Yandex/Uzum) 20-30% oladi", oqibat: "Foyda nolga teng, faqat agregator boyiydi", yechim: "O'z mustaqil dostavkangiz", bito: "0% komissiya. Barcha foyda o'zingizda qoladi", barer: "Reklama", nima_uchun: "O'z platformangiz orqali sadoqatli bazaga 0 so'm xarajat bilan sotasiz" },
+                            { daraja: "Kritik", muammo: "Operator xatosi (manzil/ingredient)", oqibat: "Ovqat sovishi, 'piyozsiz' degan mijoz bilan janjal", yechim: "Inson omilini yo'qotish", bito: "Mehmon o'zi manzilni va 'piyozsiz' deb belgilaydi", barer: "Kassaga ulanish", nima_uchun: "Ochiq API orqali mashhur tizimlar bilan integratsiya mavjud" },
+                            { daraja: "Kritik", muammo: "Stol band qilish (Bron) jarayonidagi xaos", oqibat: "Mijoz kelganda joy yo'qligi sababli asabiylashish", yechim: "Onlayn stol band qilish tizimi", bito: "MiniApp ichida mijoz bo'sh stollarni ko'rib arizani qoldiradi", barer: "Zal xaritasi", nima_uchun: "Tayyor soddalashtirilgan interaktiv bron paneli" },
+                            { daraja: "O'rta", muammo: "Ofitsiantlar menyuni va tarkibni bilmasligi", oqibat: "Sifatsiz servis va mijoz hafsalasi pir bo'lishi", yechim: "Batafsil raqamli menyu", bito: "QR orqali mijoz o'zi barcha ingredient va kalloriyani o'qiydi", barer: "Rasm yo'qligi", nima_uchun: "Matnli dizayn ham premium ko'rinishda taqdim etiladi" },
+                            { daraja: "Kritik", muammo: "Tungi yetkazib berishdagi ustama narxlarni tushuntirish", oqibat: "Mijoz tungi narx qimmatligini tushunmay janjal qiladi", yechim: "Vaqtga bog'liq dinamik narx", bito: "Tungi 23:00 dan keyin menyu narxlari avtomat o'zgaradi", barer: "Nazorat", nima_uchun: "Tizim taymer orqali hamma narsani inson ishtirokisiz boshqaradi" }
+                        ],
+                        beauty: [
+                            { daraja: "Kritik", muammo: "Krem tarkibi va natijasi haqida cheksiz savollar", oqibat: "Menejer 40 minut vaqtini konsultatsiyaga sarflab charchaydi", yechim: "Batafsil ma'lumotli vitrina", bito: "Video, tarkibi va natijasi MiniApp-da to'liq yozilgan", barer: "Dastur narxi", nima_uchun: "Tayyor Enterprise platforma arzon obuna narxida" },
+                            { daraja: "Kritik", muammo: "Kosmetika yaroqlilik (srok) muddatining tez o'tishi", oqibat: "Moliyaviy zarar, molni tashlab yuborish yoki zararga sotish", yechim: "Tezkor aksiyalar vositasi", bito: "Push-xabar orqali 1 daqiqada butun bazaga aksiyani e'lon qilish", barer: "O'qilmasligi", nima_uchun: "Telegramda Open Rate 80% dan yuqori" },
+                            { daraja: "Yuqori", muammo: "Mijozlar kremi tugaganda yangilashni unutishi", oqibat: "Barqaror (rekurrent) daromad yo'qolishi", yechim: "Mijozlar bazasi bilan ishlash", bito: "Avto-eslatma: 'SPF-kremingiz tugab qolgan bo'lsa kerak...'", barer: "Bezor qilish", nima_uchun: "Eslatmalar aqlli pauza bilan yuboriladi" },
+                            { daraja: "Kritik", muammo: "Kompleks parvarish bosqichlarini (Tonik, sivorotka) adashtirish", oqibat: "Noto'g'ri foydalanish oqibatida natija bo'lmasligi va salbiy sharh", yechim: "Qadam-ba-qadam yo'riqnoma", bito: "Kartochka ichida 1-qadam, 2-qadam tarzida vizual ko'rsatmalar", barer: "O'qishmaydi", nima_uchun: "Infografika matnga qaraganda 3 barobar yaxshi esda qoladi" }
+                        ],
+                        med: [
+                            { daraja: "Kritik", muammo: "Dori nomlaridagi xatolar va noaniq retseptlar", oqibat: "Noto'g'ri dori sotish, salomatlikka xavf", yechim: "Rasmli qidiruv va tanlov", bito: "MiniApp-da qidiruv va qadoq rasmi orqali aniq dori tanlash", barer: "Baza kiritish", nima_uchun: "Dori bazalarini import qilish funksiyasi mavjud" },
+                            { daraja: "Kritik", muammo: "Retseptli dorilarni masofadan sotish qiyinligi", oqibat: "Mijoz noiloj oflayn dorixonaga ketib qolishi", yechim: "Retseptni rasmga olib jo'natish", bito: "Bot orqali retsept rasmini tashlab bemalol tasdiqlatib buyurtma berish", barer: "Qonunchilik", nima_uchun: "Rasm to'g'ridan-to'g'ri litsenziyali farmatsevt tekshiruviga tushadi" },
+                            { daraja: "Kritik", muammo: "Nozik dorilar (Gemorroy, ZPPP) oflayn olishga uyalish", oqibat: "Mijoz dorixonada aytishga uyalib chiqib ketib qolishi", yechim: "100% anonim onlayn buyurtma", bito: "Telefon ekrani orqali hech kimga aytmasdan sokin buyurtma berish", barer: "Uyalish", nima_uchun: "Dorixona ichida yopiq paketda faqat buyurtma raqami bilan beriladi" },
+                            { daraja: "Kritik", muammo: "Dori dozirovkasini adashtirish (50mg o'rniga 100mg)", oqibat: "Og'ir tibbiy oqibatlar, janjal va dorini qaytarish", yechim: "Majburiy tanlash paneli", bito: "Katta qizil tugmalarda 50mg, 100mg modifikatorlarni tanlamay o'tolmaslik", barer: "Adashish", nima_uchun: "Savatga o'tishda dozani yana bir bor tasdiqlash uchun ko'rsatamiz" }
+                        ],
+                        parfum: [
+                            { daraja: "Kritik", muammo: "Raspis (2, 5, 10 ml) narx-navo hisobidagi xaos", oqibat: "Menejer xatosi, chalkashlik va mijozning uzoq kutishi", yechim: "Hajm bo'yicha dinamik vitrina", bito: "Mijoz '5 ml' tugmasini bossa, narx shunga mos o'zi avtomatik o'zgaradi", barer: "Dizayn", nima_uchun: "Lyuks brendlar darajasidagi vizual estetika" },
+                            { daraja: "Kritik", muammo: "Notalar haqidagi cheksiz tushuntirishlar", oqibat: "Menejerlar har kuni 'hidi qanaqa' degan savolga javob yozishdan 'kuyadi'", yechim: "Barcha ma'lumotlar vizual taqdimoti", bito: "Notalar (yuqori, o'rta, asos) MiniApp-da chiroyli ajratib yoziladi", barer: "So'rashaveradi", nima_uchun: "Vitrinaga o'rgangan mijozlar vizual axborotni osonroq qabul qiladi" },
+                            { daraja: "Kritik", muammo: "Qalbaki (Poddelka) emasligiga ishonchsizlik", oqibat: "Qimmat atirni onlayn ko'rmay olishdan qo'rqish", yechim: "Otzivlar va sertifikatlar moduli", bito: "Kartochkada real xaridorlar sharhi va original sertifikat rasmini ko'rsatish", barer: "Ishonch", nima_uchun: "Haqiqiy foydalanuvchilar qoldirgan sharh ishonchni 70% oshiradi" },
+                            { daraja: "Kritik", muammo: "Qadoqning (Upakovka) yo'lda ezilishi yoki shikastlanishi", oqibat: "Qimmatbaho atir ko'rinishining buzilishi va vozvrat", yechim: "Logistikada ehtiyotkorlik statusi", bito: "Buyurtma shaklida kuryer uchun 'Extiyot bo'ling - Shisha' degan yirik belgi", barer: "E'tiborsizlik", nima_uchun: "Qimmatbaho tovarlar uchun ishonchli tariflarga API orqali ulash imkoni" }
+                        ],
+                        kiyim: [
+                            { daraja: "Kritik", muammo: "O'lcham/rangda adashish (Kichkina yoki katta kelishi)", oqibat: "Vozvrat (qaytish) va ikki barobar logistika xarajati", yechim: "Mijoz o'zi parametrlarni kiritishi", bito: "S, M, L o'lcham va rangni aynan mahsulot ichida tanlash majburiyligi", barer: "Sayt narxi", nima_uchun: "IT infratuzilma qimmat emas - arzon oylik obunada beriladi" },
+                            { daraja: "Yuqori", muammo: "Kiyimni kiyib ko'rish (Primerka) talabi va qaytarish qo'rquvi", oqibat: "O'lchami to'g'ri kelmasa qaytarolmayman deb umuman xarid qilmaslik", yechim: "Shaffof qaytarish siyosati", bito: "Mahsulot ostida 'Uyingizda kiyib ko'ring, mos kelmasa qaytaramiz' yozuvi", barer: "Kutishi", nima_uchun: "Yetkazib berish sozlamalarida primerka shartlari va vaqtini yozish mumkin" },
+                            { daraja: "Kritik", muammo: "Matoning sifati va teksturasi rasmda bilinmasligi", oqibat: "Kutishlar oqlanmasligi, 'rasmdagidek emas ekan' degan e'tiroz", yechim: "Batafsil Zoom va Video", bito: "Mahsulot suratini yaqinlashtirish (Zoom) va mato videosini yuklash", barer: "Cheklov", nima_uchun: "Yuqori sifatli rasmlar va videolarni cheklovsiz joylash mumkin" },
+                            { daraja: "Kritik", muammo: "Modelning bo'yi va kiygan o'lchamini bilmaslik", oqibat: "Mijoz 'menga kaltamasmi' deb ikkilanishi", yechim: "Model parametrlari belgisi", bito: "Rasmlar ostida 'Modelning bo'yi 175 sm, kiygan o'lchami M' yozuvi", barer: "Ma'lumot", nima_uchun: "Oddiy tekst formati buni oson ko'rsatishga yordam beradi" }
+                        ],
+                        elektronika: [
+                            { daraja: "Kritik", muammo: "Muddatli to'lov (Rassrochka) hisob-kitobidagi tushunmovchilik", oqibat: "Mijoz foizlarni ko'rib qo'rqib qochib ketishi", yechim: "Shaffof kalkulyator", bito: "Mahsulot ostida 'Oyiga 300,000 so'mdan' degan hisoblagich turishi", barer: "Banklar", nima_uchun: "Tayyor integratsiyalar (masalan, Alif yoki Uzum Nasiya) ulash imkoni" },
+                            { daraja: "Kritik", muammo: "Katta gabaritli texnikalarni (Muzlatgich) logistikasi", oqibat: "Dostavka narxi oxirida qimmat chiqib, mijoz rad etishi", yechim: "Manzil va qavatga qarab narxlash", bito: "Buyurtma berishda etajni ko'rsatish va shunga qarab dostavka narxlash", barer: "Kuryerlar", nima_uchun: "Hamma narx oldindan chekda aniq ko'rsatilgan bo'ladi" },
+                            { daraja: "Kritik", muammo: "Qimmat texnika uchun oflayn ishonch qidirish", oqibat: "Televizorni onlayn olishga qo'rqib ishonchli joy qidirishi", yechim: "Oflayn nuqtalar xaritasi", bito: "Kontaktlar bo'limida lokatsiyalar, filiallar va ishonch elementlari", barer: "Oflayn", nima_uchun: "Kafolat, qaytarish shartlari sahifasi mijoz ishonchini tiklaydi" }
+                        ],
+                        mebel: [
+                            { daraja: "Kritik", muammo: "Mebelning xonaga sig'ishini (Razmerlar) tushunmaslik", oqibat: "Sotib olgach xonaga sig'maydi, mebel qaytariladi", yechim: "Batafsil chizmalar va o'lchamlar", bito: "Rasmlar ichida mebelning Uzunlik/Kenglik/Balandlik sxemasini joylash", barer: "Adashish", nima_uchun: "Buyurtma berganda 'O'lchamni tekshirdim' degan galochka qo'yadi" },
+                            { daraja: "Kritik", muammo: "Katta mebellarni logistikasi (Etajga chiqarish narxi)", oqibat: "Kuryer 'etajga 50 ming' desa mijozning hafsalasi pir bo'lishi", yechim: "Shaffof yetkazish shartlari", bito: "Etajni tanlashga qarab dostavka narxi rasmiy hisoblab beriladi", barer: "Qimmat", nima_uchun: "Mijozlar shaffoflikni va oldindan kutilgan xarajatni yaxshi ko'radi" },
+                            { daraja: "Kritik", muammo: "Mebel rasmda katta ko'rinib, hayotda kichik chiqishi", oqibat: "Mijoz 'kreslo kichkina ekan' deb hafsalasi pir bo'lishi", yechim: "Real masshtabli rasmlar", bito: "Mahsulot yonida odam turgan qo'shimcha rasmlar ko'rsatish", barer: "Rasmga olish", nima_uchun: "BitoMarket xohlagancha qo'shimcha rasmlarni bepul saqlaydi" }
+                        ],
+                        bolalar: [
+                            { daraja: "Kritik", muammo: "Bolaning tez o'sishi sabab razmerni topa olmaslik", oqibat: "Qidiruvda vaqt yo'qotib, xaridorning asabiylashishi", yechim: "Yoshga qarab aqlli qidiruv", bito: "Katalog '0-3 yosh', '3-6 yosh' teglari orqali aniq filtrlarga ega", barer: "Teglar", nima_uchun: "BitoMarketda tovar kiritishda yosh toifalari belgilash juda oson" },
+                            { daraja: "Kritik", muammo: "Ota-onalarning vaqti yo'qligi (Tezkor pampers/pyure)", oqibat: "Vaqt kutishga toqat yo'q, mijoz eng yaqin do'konga tushadi", yechim: "Tezkor yetkazib berish va oson xarid", bito: "App qidirmay Telegram o'zidan 3 klikda pampers zakaz qilish", barer: "Dostavka", nima_uchun: "Bot orqali buyurtma 1 sekda kassaga boradi" },
+                            { daraja: "Kritik", muammo: "Bolaning mato yoki o'yinchoq materialidan allergiyasi", oqibat: "Sintetika deb o'ylab xarid qilmaslik", yechim: "Gipoallergen va Eco yorliqlari", bito: "Katalogda '100% Paxta' va 'Gipoallergen' teglari orqali filtrlash", barer: "Teglar", nima_uchun: "Ota-onalar farzandi sog'lig'i uchun aynan shu filtrlarni izlashadi" }
+                        ],
+                        avto: [
+                            { daraja: "Kritik", muammo: "Mijozga qaysi zapchast tushishini aniqlash (VIN kod)", oqibat: "Noto'g'ri detal sotish, mashinaga tushmasligi va vozvrat", yechim: "Model va yil bo'yicha aqlli filtr", bito: "Faqat mashina markasi va yiliga mos qismlar chiqadigan dinamik katalog", barer: "Baza katta", nima_uchun: "Excel orqali ommaviy yuklash va teglash tizimi ishlangan" },
+                            { daraja: "Kritik", muammo: "Usta xizmati bilan birga sotish (Okat hisob-kitobi)", oqibat: "Ustalar qancha ulush olganini hisoblab o'tirishdagi xaos", yechim: "Ustalar uchun referal tizim", bito: "Har bir usta uchun alohida havola, kimdan qancha savdo bo'lgani ko'rinadi", barer: "Usta texnika", nima_uchun: "Faqat havola (silka) yuboradi xolos, qolgani avtomat" },
+                            { daraja: "Kritik", muammo: "To'plam qilib sotish (Masalan: Moy + Filtr)", oqibat: "Mijoz faqat moy oladi, filtrni boshqa joydan izlaydi", yechim: "Bundle qilib o'rtacha chekni oshirish", bito: "Moy tanlanganda avtomatik 'Bunga tushuvchi filtrlar' taklif qilinadi", barer: "Moslashtirish", nima_uchun: "Kategoriyalarni bog'lash orqali aqlli tavsiyalar yaratiladi" }
+                        ],
+                        supermarket: [
+                            { daraja: "Kritik", muammo: "Tarozili (Gramm/KG) mahsulotlar hisobi", oqibat: "Mijozga 'necha gramm kerak?' deb Directda yozishib o'tirish", yechim: "Vaznni tanlash modifikatorlari", bito: "0.5 kg yoki 1 kg ni mijoz kartochkaning o'zidayoq bosib tanlaydi", barer: "Dastur qimmat", nima_uchun: "Katta supermarketlar tizimi obuna asosida arzon narxda beriladi" },
+                            { daraja: "Kritik", muammo: "Tez ayniydigan mahsulotlar (Srok) nazorati", oqibat: "Sut, kolbasa kabi mahsulotlarning buzilib qolishi va zarar", yechim: "Sroki yaqinlar uchun 'Sale' va Push", bito: "Kechqurunlari 'Aksiya: Barcha pishiriqlar 50% chegirmada' deb sotib yuborish", barer: "Kim o'qiydi", nima_uchun: "Bunday super-chegirmalarni odamlar kutib turib xarid qiladi" },
+                            { daraja: "Kritik", muammo: "Zallardagi uzun navbatlar (Kechki pik vaqtda)", oqibat: "Navbatda turishga asabiylashib, sotib olingan narsalarni tashlab ketish", yechim: "Scan & Go (Navbatsiz xarid)", bito: "Zalda QR ni o'qitadi, telefonda to'laydi va navbatsiz chiqib ketadi", barer: "O'g'rilik", nima_uchun: "Eshikda nazoratchi faqat telefon ekranidagi yashil chekni ko'radi" },
+                            { daraja: "Kritik", muammo: "Kichik cheklar (Faqat bitta narsa olish) muammosi", oqibat: "Dostavka xarajati mahsulot narxidan qimmat bo'lib qolishi", yechim: "Minimal buyurtma summasi", bito: "Tizimga 'Minimal xarid - 50 000 so'm' qoidasini kiritish", barer: "Qochishi", nima_uchun: "Mijoz noiloj chekni to'ldirish uchun shirinlik yoki sharbat qo'shadi" }
+                        ]
+                    }
+                };
+            },
+            created() {
+                // Har bir muammoga unikal ID berish
+                let uid = 1;
+                for (let cat in this.data) {
+                    this.data[cat].forEach(item => {
+                        if (!item.uid) item.uid = 'item_' + uid++;
+                    });
+                }
+            },
+            computed: {
+                isScriptTab() {
+                    return this.activeTab === 'hotCall' || this.activeTab === 'coldCall';
+                },
+                currentCategoryName() {
+                    if(this.activeTab === 'hotCall') return "Hot Call Skripti";
+                    if(this.activeTab === 'coldCall') return "Cold Call Skripti";
+                    if(this.activeTab === 'hidden') return "Yashiringan muammolar";
+                    if(this.activeTab === 'trash') return "Korzinka (O'chirilganlar)";
+                    const cat = this.categories.find(c => c.id === this.activeTab);
+                    return cat ? cat.name : '';
+                },
+                totalItemsCount() {
+                    let total = 0;
+                    for (let cat in this.data) {
+                        total += this.data[cat].length;
+                    }
+                    return total;
+                },
+                activeItemsCount() {
+                    return this.totalItemsCount - this.deletedItemIds.length;
+                },
+                filteredData() {
+                    if (this.isScriptTab) return []; // Skript tabida datani ishlatmaymiz
+
+                    let result = [];
+                    if (this.activeTab === 'trash') {
+                        for (let cat in this.data) {
+                            result.push(...this.data[cat].filter(item => this.isDeleted(item)));
+                        }
+                    } else if (this.activeTab === 'hidden') {
+                        for (let cat in this.data) {
+                            result.push(...this.data[cat].filter(item => this.isHidden(item) && !this.isDeleted(item)));
+                        }
+                    } else if (this.data[this.activeTab]) {
+                        result = this.data[this.activeTab].filter(item => !this.isHidden(item) && !this.isDeleted(item));
+                    }
+
+                    if (this.searchTerm) {
+                        const term = this.searchTerm.toLowerCase();
+                        result = result.filter(item => {
+                            return Object.values(item).some(val => 
+                                val && val.toString().toLowerCase().includes(term)
+                            );
+                        });
+                    }
+
+                    const darajaWeight = { 'Kritik': 4, 'Yuqori': 3, 'O\'rta': 2, 'Past': 1 };
+                    return result.sort((a, b) => (darajaWeight[b.daraja] || 0) - (darajaWeight[a.daraja] || 0));
+                }
+            },
+            methods: {
+                changeTab(tabId) {
+                    this.activeTab = tabId;
+                    this.searchTerm = '';
+                    this.showSearchDropdown = false;
+                },
+                hideDropdown() {
+                    setTimeout(() => { this.showSearchDropdown = false; }, 200);
+                },
+                selectSearchItem(item) {
+                    this.searchTerm = item.muammo; 
+                    this.showSearchDropdown = false;
+                },
+                toggleHide(item) {
+                    const index = this.hiddenItemIds.indexOf(item.uid);
+                    if (index > -1) {
+                        this.hiddenItemIds.splice(index, 1);
+                    } else {
+                        this.hiddenItemIds.push(item.uid);
+                    }
+                },
+                isHidden(item) {
+                    return this.hiddenItemIds.includes(item.uid);
+                },
+                initDelete(item) {
+                    this.itemToDelete = item;
+                    this.showDeleteModal = true;
+                },
+                confirmDelete() {
+                    if (this.itemToDelete && !this.deletedItemIds.includes(this.itemToDelete.uid)) {
+                        this.deletedItemIds.push(this.itemToDelete.uid);
+                    }
+                    this.showDeleteModal = false;
+                    this.itemToDelete = null;
+                },
+                isDeleted(item) {
+                    return this.deletedItemIds.includes(item.uid);
+                },
+                restoreItem(item) {
+                    const index = this.deletedItemIds.indexOf(item.uid);
+                    if (index > -1) {
+                        this.deletedItemIds.splice(index, 1);
+                    }
+                },
+                permanentDelete(item) {
+                    for (let cat in this.data) {
+                        const index = this.data[cat].findIndex(i => i.uid === item.uid);
+                        if (index > -1) {
+                            this.data[cat].splice(index, 1);
+                            break;
+                        }
+                    }
+                    this.restoreItem(item);
+                    if(this.isHidden(item)) this.toggleHide(item);
+                },
+                
+                // Yangi Kategoriya
+                saveNewCategory() {
+                    if (!this.newCategoryName.trim()) return;
+                    
+                    const newId = 'cat_' + Date.now();
+                    this.categories.push({
+                        id: newId,
+                        name: this.newCategoryName.trim(),
+                        icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>'
+                    });
+                    
+                    this.data[newId] = []; // Bo'sh ma'lumotlar massivi
+                    this.newCategoryName = '';
+                    this.showAddCategoryModal = false;
+                    this.changeTab(newId);
+                },
+                confirmDeleteCategory() {
+                    // Kategoriyani arraydan o'chirish
+                    const index = this.categories.findIndex(c => c.id === this.activeTab);
+                    if (index > -1) {
+                        this.categories.splice(index, 1);
+                    }
+                    // Data ichidan o'chirish
+                    delete this.data[this.activeTab];
+                    
+                    this.showDeleteCatModal = false;
+                    this.changeTab('umumiy');
+                },
+
+                // Yangi muammo qo'shish
+                openAddModal() {
+                    this.formError = '';
+                    this.showAddModal = true;
+                    if(!this.isScriptTab && this.activeTab !== 'hidden' && this.activeTab !== 'trash') {
+                        this.newItem.category = this.activeTab;
+                    } else {
+                        this.newItem.category = 'umumiy';
+                    }
+                },
+                saveNewItem() {
+                    if (!this.newItem.muammo || !this.newItem.yechim || !this.newItem.bito || !this.newItem.oqibat) {
+                        this.formError = "Yulduzcha (*) qo'yilgan joylarni to'ldiring!";
+                        return;
+                    }
+
+                    const newUid = 'item_custom_' + Date.now();
+                    const itemToSave = {
+                        uid: newUid,
+                        daraja: this.newItem.daraja,
+                        muammo: this.newItem.muammo,
+                        oqibat: this.newItem.oqibat,
+                        belgi: this.newItem.category === 'umumiy' ? this.newItem.oqibat : '', 
+                        ta_sir: '', 
+                        yechim: this.newItem.yechim,
+                        bito: this.newItem.bito,
+                        barer: this.newItem.barer,
+                        nima_uchun: this.newItem.nima_uchun
+                    };
+
+                    if (!this.data[this.newItem.category]) {
+                        this.data[this.newItem.category] = [];
+                    }
+                    this.data[this.newItem.category].push(itemToSave);
+
+                    this.newItem = {
+                        category: this.newItem.category,
+                        daraja: 'Kritik',
+                        muammo: '', oqibat: '', yechim: '', bito: '', barer: '', nima_uchun: ''
+                    };
+                    
+                    this.showAddModal = false;
+                    if(this.activeTab !== this.newItem.category) {
+                        this.changeTab(this.newItem.category);
+                    }
+                },
+
+                // Skriptlar logikasi
+                addScriptBlock(tab) {
+                    const newId = Date.now();
+                    this.scripts[tab].push({
+                        id: newId,
+                        role: 'seller',
+                        text: ''
+                    });
+                },
+                deleteScriptBlock(tab, index) {
+                    this.scripts[tab].splice(index, 1);
+                },
+
+                getActiveCount(catId) {
+                    if(!this.data[catId]) return 0;
+                    return this.data[catId].filter(item => !this.isHidden(item) && !this.isDeleted(item)).length;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
