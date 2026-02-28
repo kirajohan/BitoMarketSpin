@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BitoMarket SPIN Baza (Cloud & Tahrirlash)</title>
+    <title>BitoMarket SPIN Baza & Skriptlar (Local)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -30,24 +30,11 @@
             content: ''; position: absolute; left: 24px; top: 40px; bottom: -20px; width: 2px; background-color: #e2e8f0; z-index: 0;
         }
         .script-item:last-child .script-line::before { display: none; }
-
-        .loader {
-            border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%;
-            width: 40px; height: 40px; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex flex-col">
     <div id="app" v-cloak class="flex flex-col h-full w-full max-w-[1600px] mx-auto bg-white shadow-2xl relative">
         
-        <!-- Loading Screen -->
-        <div v-if="!isInitialized" class="absolute inset-0 z-[100] bg-white flex flex-col items-center justify-center">
-            <div class="loader mb-4"></div>
-            <h2 class="text-xl font-bold text-slate-800">Shaxsiy bazangiz yuklanmoqda...</h2>
-            <p class="text-sm text-slate-500 mt-2">Bulutli server (Cloud) bilan sinxronizatsiya</p>
-        </div>
-
         <!-- Add Kategoriya Modal -->
         <transition name="fade">
             <div v-if="showAddCategoryModal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -89,7 +76,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </button>
                         </div>
-                        <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-5">
+                        <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-4">
                             <div v-if="formError" class="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-bold border border-red-100 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                                 {{ formError }}
@@ -115,16 +102,9 @@
 
                             <div class="space-y-1.5">
                                 <label class="text-xs font-bold text-slate-500 uppercase">Mijoz Muammosi (Sarlavha) *</label>
-                                <div class="flex flex-col sm:flex-row gap-2">
-                                    <input type="text" v-model="newItem.muammo" placeholder="Masalan: Tungi yetkazib berishdagi ustama narxlarni tushuntirish..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold">
-                                    <button @click="generateSPINAI" :disabled="!newItem.muammo || isGeneratingSPIN" class="shrink-0 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-3 sm:py-0 rounded-xl font-bold shadow-sm hover:shadow-md disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                                        <span v-if="isGeneratingSPIN" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
-                                        <span v-else>✨ AI to'ldirish</span>
-                                    </button>
-                                </div>
+                                <input type="text" v-model="newItem.muammo" placeholder="Masalan: Tungi yetkazib berishdagi ustama narxlarni tushuntirish..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold">
                             </div>
 
-                            <!-- UMUMIY BO'LIM UCHUN MAXSUS MAYDONLAR -->
                             <template v-if="newItem.category === 'umumiy'">
                                 <div class="space-y-1.5">
                                     <label class="text-xs font-bold text-slate-500 uppercase">Belgisi (Simptom) *</label>
@@ -136,7 +116,6 @@
                                 </div>
                             </template>
 
-                            <!-- BOSHQA BO'LIMLAR UCHUN MAXSUS MAYDONLAR -->
                             <template v-else>
                                 <div class="space-y-1.5">
                                     <label class="text-xs font-bold text-slate-500 uppercase">Oqibatlar / Simptom *</label>
@@ -144,13 +123,11 @@
                                 </div>
                             </template>
 
-                            <!-- YECHIM MAYDONI HAMMA UCHUN -->
                             <div class="space-y-1.5">
                                 <label class="text-xs font-bold text-slate-500 uppercase">Ideal Yechim *</label>
                                 <textarea v-model="newItem.yechim" placeholder="Mijoz muammosini hal qilishning eng yaxshi yo'li..." rows="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium resize-none"></textarea>
                             </div>
 
-                            <!-- BOSHQA BO'LIMLAR UCHUN QO'SHIMCHA BITO YECHIMLARI -->
                             <template v-if="newItem.category !== 'umumiy'">
                                 <div class="space-y-1.5">
                                     <label class="text-xs font-bold text-blue-600 uppercase">BitoMarket Yechimi *</label>
@@ -225,7 +202,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="md:w-6 md:h-6"><path d="M12 2L2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
                 </div>
                 <div class="min-w-0">
-                    <h1 class="text-lg md:text-xl font-extrabold text-slate-800 tracking-tight truncate">BitoMarket SPIN (Cloud)</h1>
+                    <h1 class="text-lg md:text-xl font-extrabold text-slate-800 tracking-tight truncate">BitoMarket SPIN Baza</h1>
                     <p class="text-[9px] md:text-[10px] text-blue-600 uppercase tracking-widest font-bold mt-0.5">
                         <span v-if="!isScriptTab">Jami mavjud: {{ activeItemsCount }} ta muammo</span>
                         <span v-else>Sotuvchi va Mijoz dialoglari</span>
@@ -343,21 +320,6 @@
                             {{ activeTab === 'hotCall' ? '🔥 Hot Call Skripti' : '❄️ Cold Call Skripti' }}
                         </h2>
                         <p class="text-sm text-slate-500 mt-2 font-medium">Bloklar orqali sotuv jarayonini chizib chiqing.</p>
-                        
-                        <!-- AI Script Generator UI -->
-                        <div class="mt-6 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 md:p-5 rounded-2xl border border-indigo-100 flex flex-col gap-3 shadow-sm">
-                            <div class="flex flex-col md:flex-row gap-3 items-center w-full">
-                                <input type="text" v-model="scriptPrompt" placeholder="Qanday vaziyat uchun skript kerak? Masalan: O'ylab ko'raman degan mijozga..." @keyup.enter="generateScriptAI(activeTab)" class="flex-grow p-3 bg-white border border-indigo-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm w-full font-medium placeholder-indigo-300 text-indigo-900">
-                                <button @click="generateScriptAI(activeTab)" :disabled="!scriptPrompt || isGeneratingScript" class="w-full md:w-auto shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3 rounded-xl font-bold shadow-md hover:shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                                    <span v-if="isGeneratingScript" class="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
-                                    <span v-else>✨ AI Yaratish</span>
-                                </button>
-                            </div>
-                            <div v-if="scriptError" class="text-xs font-bold text-red-500 w-full mt-1 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                {{ scriptError }}
-                            </div>
-                        </div>
                     </div>
 
                     <div class="relative space-y-6">
@@ -368,7 +330,7 @@
                             <div class="bg-white border rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md" :class="block.role === 'seller' ? 'border-blue-200 ml-0 md:mr-12' : 'border-slate-200 mr-0 md:ml-12'">
                                 <div class="px-4 py-3 flex justify-between items-center border-b" :class="block.role === 'seller' ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'">
                                     <div class="flex items-center gap-3">
-                                        <select v-model="block.role" @change="saveData" class="bg-transparent font-black uppercase tracking-widest text-[10px] outline-none cursor-pointer" :class="block.role === 'seller' ? 'text-blue-700' : 'text-slate-600'">
+                                        <select v-model="block.role" @change="saveDataLocally" class="bg-transparent font-black uppercase tracking-widest text-[10px] outline-none cursor-pointer" :class="block.role === 'seller' ? 'text-blue-700' : 'text-slate-600'">
                                             <option value="seller">Sotuvchi (Biz)</option>
                                             <option value="client">Mijoz (Ular)</option>
                                         </select>
@@ -426,7 +388,6 @@
                                             <td class="px-6 py-4 text-center">
                                                 <div class="flex flex-col items-center gap-3">
                                                     <span :class="['px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider', row.daraja === 'Kritik' ? 'bg-red-50 text-red-600' : (row.daraja === 'Yuqori' ? 'bg-orange-50 text-orange-600' : 'bg-slate-100 text-slate-600')]">{{ row.daraja }}</span>
-                                                    <!-- Tugmalar doim ko'rinadigan qilindi -->
                                                     <div class="flex items-center justify-center gap-1.5 opacity-100 transition-opacity w-full">
                                                         <button @click="openEditModal(row)" title="Tahrirlash" class="text-slate-400 hover:text-blue-600 bg-white hover:bg-blue-50 p-1.5 rounded-lg border border-slate-200 hover:border-blue-200 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
                                                         <button @click="initDelete(row)" title="O'chirish" class="text-slate-400 hover:text-red-600 bg-white hover:bg-red-50 p-1.5 rounded-lg border border-slate-200 hover:border-red-200 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
@@ -533,26 +494,9 @@
         </div>
     </div>
 
-    <!-- Firebase va Asosiy Logika -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        const { createApp } = Vue; // Global Vue dan olindi
+    <script>
+        const { createApp } = Vue;
 
-        // Global Firebase o'zgaruvchilari (Tizim taqdim etadi)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'bito-market-spin';
-        const fbConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { /* Fallback config */ };
-        
-        // Gemini API Key
-        const apiKey = "";
-
-        const app = initializeApp(fbConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Standart boshlang'ich ma'lumotlar
         const INITIAL_STATE = {
             categories: [
                 { id: 'umumiy', name: "Umumiy SPIN", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
@@ -586,43 +530,264 @@
                     { uid: 'u2', muammo: "Savat tashlab ketish (Checkout drop)", belgi: "60%+ xaridor to'lov bosqichida ketadi", ta_sir: "Yo'qotilgan real daromad", yechim: "1-klik checkout, eslatma bot (Follow-up)", daraja: "Kritik" },
                     { uid: 'u3', muammo: "Sekin sayt va platforma", belgi: "3+ sek yuklanish, qotib qolish", ta_sir: "Bounce rate oshadi, asabiy mijozlar", yechim: "Telegram MiniApp yoki tezkor CDN", daraja: "Yuqori" },
                     { uid: 'u4', muammo: "Ishonch pastligi (Otziv yo'q)", belgi: "Odamlar poddelkadan yoki aldanib qolishdan qo'rqadi", ta_sir: "Sotuvga katta qarshilik", yechim: "Real review moduli, SSL, kafolat sahifasi", daraja: "Yuqori" },
-                    { uid: 'u5', muammo: "Reklama ROI past (CAC yuqori)", belgi: "1 ta mijoz topish juda qimmat", ta_sir: "Sof foyda kamayadi", yechim: "Retargeting va mijoz ushlab qolish tizimi", daraja: "Kritik" }
+                    { uid: 'u5', muammo: "Reklama ROI past (CAC yuqori)", belgi: "1 ta mijoz topish juda qimmat", ta_sir: "Sof foyda kamayadi", yechim: "Retargeting va mijoz ushlab qolish tizimi", daraja: "Kritik" },
+                    { uid: 'u6', muammo: "Takroriy mijoz (LTV) yo'qligi", belgi: "Mijoz faqat 1 marta xarid qiladi", ta_sir: "Reklamaga doimiy og'ir xarajat", yechim: "Loyalty (Sodiqlik) dasturi, Cashback", daraja: "Kritik" },
+                    { uid: 'u7', muammo: "CRM va mijozlar bazasi yo'qligi", belgi: "Mijozlar raqami Excelda yoki bloknotda tarqoq", ta_sir: "Auditoriyani yo'qotish va nazoratsizlik", yechim: "Avtomatlashgan CRM va teglash tizimi", daraja: "Yuqori" },
+                    { uid: 'u8', muammo: "Ombor nazorati va qoldiq chalkashligi", belgi: "Sotilgan tovar amalda yo'q (Out-of-stock)", ta_sir: "Mijozga pul qaytarish, negativ", yechim: "Online/Offline yagona sinxronlashgan baza", daraja: "Kritik" },
+                    { uid: 'u9', muammo: "Qaytarish (Vozvrat) ko'pligi", belgi: "Tovarning rasmiga mos kelmasligi", ta_sir: "Ikki barobar logistika xarajati", yechim: "Batafsil tavsif, video sharhlar vitrinasi", daraja: "Yuqori" },
+                    { uid: 'u10', muammo: "Yetkazib berish (Logistika) muammolari", belgi: "Kuryer kechikishi, mijozning kutib qolishi", ta_sir: "Salbiy fikr va mijozni yo'qotish", yechim: "Buyurtma statusi va kuryer nazorati API", daraja: "Yuqori" },
+                    { uid: 'u11', muammo: "Valyuta kursi va narxlarni yangilash azobi", belgi: "Yuzlab tovar narxi kurs sakraganda xato qoladi", ta_sir: "Zarariga sotish yoki kechasi bilan tahrirlash", yechim: "Ommaviy narx boshqaruvi (Mass update)", daraja: "Kritik" },
+                    { uid: 'u12', muammo: "O'rtacha chek pastligi (AOV)", belgi: "Har bir xariddan tushum kichik", ta_sir: "Kichik marja", yechim: "Upsell / Cross-sell (Tavsiya tizimi)", daraja: "O'rta" },
+                    { uid: 'u13', muammo: "Zaif mahsulot kartochkasi", belgi: "Faqat 1 ta rasm va narx bor xolos", ta_sir: "Past CTR, savdo pasayishi", yechim: "Batafsil matn, sifatli UI/UX dizayn", daraja: "O'rta" },
+                    { uid: 'u14', muammo: "Ijtimoiy tarmoqlar (Insta/FB) bloklanishi xavfi", belgi: "Shadowban yoki akkaunt bloklanishi qo'rquvi", ta_sir: "Butun biznesni nolga tushishi", yechim: "Mustaqil va bloklanmaydigan shaxsiy do'kon", daraja: "Kritik" },
+                    { uid: 'u15', muammo: "Chegirmalarga to'liq qaramlik", belgi: "Mijoz faqat chegirma e'lon qilinganda keladi", ta_sir: "Biznes foydasiz ishlaydi", yechim: "Eksklyuzivlik va yopiq klub (Promo) tizimi", daraja: "Yuqori" },
+                    { uid: 'u16', muammo: "Xodimlar va kassadagi o'g'riliklar", belgi: "Kassadagi kamomad (nedostacha)", ta_sir: "Foydani bevosita o'g'irlatish", yechim: "To'liq raqamli invoys va kassa hisobi", daraja: "Kritik" },
+                    { uid: 'u17', muammo: "Oflayn zallardagi navbatlar", belgi: "Kutishdan charchab chiqib ketadigan odamlar", ta_sir: "Pik soatlardagi sof zarar", yechim: "QR kod order orqali navbatsiz mustaqil xarid", daraja: "Yuqori" },
+                    { uid: 'u18', muammo: "Mijozlarning turli tillarda murojaat qilishi", belgi: "Menejerning rus/o'zbek tilida xatosi", ta_sir: "Tushunmovchilik sabab mijoz ketishi", yechim: "Ko'p tilli (Multilang) avto-interfeys", daraja: "O'rta" },
+                    { uid: 'u19', muammo: "To'lov tizimlari ishonchsizligi", belgi: "Mijoz kartaga pul o'tkazishdan qo'rqadi", ta_sir: "Sotuvni oxirgi bosqichda sinishi", yechim: "Rasmiy Payme/Click billing integratsiyasi", daraja: "Yuqori" },
+                    { uid: 'u20', muammo: "Direct-dagi xaos va xabarlarni yo'qotish", belgi: "Menejer ulgurmaydi, xabarlar o'qilmay qoladi", ta_sir: "Issiq mijoz sovuydi va konkurentga o'tadi", yechim: "Menejerlarsiz 24/7 avtonom bot tizimi", daraja: "Kritik" }
                 ],
                 mobil: [
                     { uid: 'm1', daraja: "Kritik", muammo: "Yangi modellar uchun to'g'ri chexol topish azobi", oqibat: "Mijoz 'bu menga tushadimi' deb izlab oxiri chiqib ketadi", yechim: "Aqlli qidiruv (Model bo'yicha)", bito: "Qidiruvga S24 yozilsa, faqat unga mos narsalar chiqadi", barer: "Bazani to'ldirish", nima_uchun: "Tovarlarni ommaviy Excel orqali teglab yuklash mumkin" },
-                    { uid: 'm2', daraja: "Yuqori", muammo: "Kafolat (garantiya) talonlarining yo'qolishi", oqibat: "Mijoz bilan tortishuv va janjallar (Mening garantiyam bor edi deb)", yechim: "Raqamli xarid tarixi", bito: "Mijoz profilida qachon olingani va kafolati avtomatik saqlanadi", barer: "Ro'yxatdan o'tish", nima_uchun: "Telegramda avtorizatsiya 1 sekundda o'tkazadi" }
+                    { uid: 'm2', daraja: "Yuqori", muammo: "Kafolat (garantiya) talonlarining yo'qolishi", oqibat: "Mijoz bilan tortishuv va janjallar", yechim: "Raqamli xarid tarixi", bito: "Mijoz profilida kafolat avtomatik saqlanadi", barer: "Ro'yxatdan o'tish", nima_uchun: "Telegramda avtorizatsiya 1 sekundda o'tkazadi" },
+                    { uid: 'm3', daraja: "Yuqori", muammo: "Rasm/video jo'natishda menejer suratkashga aylanishi", oqibat: "Xodim mijoz bilan ishlash o'rniga faqat rasm qidiradi", yechim: "Tayyor vizual vitrina", bito: "Mijoz o'zi MiniApp da mahsulotning barcha videosharlarni ko'radi", barer: "Rasmlar qotishi", nima_uchun: "BitoMarket rasmlarni CDN orqali eng tezkor formatda ochadi" },
+                    { uid: 'm4', daraja: "Kritik", muammo: "Original vs Poddelka ajratish muammosi", oqibat: "Arzon Xitoy narsasi deb o'ylab, xariddan voz kechish", yechim: "Ishonch va sifat emblemalari", bito: "Mahsulot nomida '100% Original' yorliqlari (Badge) tirkash", barer: "Isboti nima", nima_uchun: "Mijozlar otzivi va mahsulot sertifikati rasmi biriktiriladi" },
+                    { uid: 'm5', daraja: "Yuqori", muammo: "Aksessuarlar mosligini adashtirish (Kopiya vs Original)", oqibat: "Mijoz AirPods nusxasini original deb o'ylab tortishishi", yechim: "Aniq modifikatorlar (Copy / Orig)", bito: "Tovar tanlashda mijoz sifat darajasini o'zi bosib belgilaydi", barer: "O'qimaydi", nima_uchun: "Modifikatorni bosmasa savatga qoshilmaydi" },
+                    { uid: 'm6', daraja: "O'rta", muammo: "Arzon plonkalar uchun oflaynga kelishga erinish", oqibat: "Mayda xaridlar sabab tushumning pasayishi", yechim: "Onlayn xarid + O'zi olib ketish", bito: "Mijoz 2$ lik narsani ham bron qilib to'lab qo'yadi", barer: "Komissiyasi", nima_uchun: "Mayda xaridlar orqali odamlar qimmatroq narsa ham oladi" },
+                    { uid: 'm7', daraja: "O'rta", muammo: "Eski modellar (iPhone X) chexollari qolib ketishi", oqibat: "Nelikvid tovarlarda pullarning muzlashi", yechim: "Katalogda 'SALE' toifalari", bito: "Eski modellar uchun maxsus chegirma bo'limlari yaratish", barer: "Qanday sotiladi", nima_uchun: "Asosiy vitrinada aksiyalarni ajratib ko'rsatish bloki bor" },
+                    { uid: 'm8', daraja: "O'rta", muammo: "Telefon xarakteristikalarini tushuntirish azobi", oqibat: "Menejerning texnik bilimi yo'qligi sababli mijoz ishonchi tushishi", yechim: "Batafsil texnik parametrlar", bito: "Protsessor, xotira kabi parametrlar jadval bo'lib chiqadi", barer: "Kim yozadi", nima_uchun: "Internetdan tayyor xarakteristikalarni copy-paste qilinadi" },
+                    { uid: 'm9', daraja: "Yuqori", muammo: "Trade-in (Eskisini almashtirish) jarayoni", oqibat: "Direct orqali qanday narxlash uzoq davom etishi", yechim: "Maxsus murojaat formasi", bito: "Telefon modelini kiritib baholash so'rovi yuborish funksiyasi", barer: "Funksiya yo'q", nima_uchun: "BitoMarket 'Xizmatlar' bo'limi arizalar qabul qila oladi" },
+                    { uid: 'm10', daraja: "O'rta", muammo: "Zaryadchik izlab kelgan mijozga Powerbank sotolmaslik", oqibat: "Qo'shimcha daromadni boy berish", yechim: "Tavsiyalar bloki (Cross-sell)", bito: "Savatga o'tganda 'Bularni ham oling' deb Powerbank taklif etiladi", barer: "Asabiylashishi", nima_uchun: "Bu juda tabiiy UX bo'lib, qulaylikni oshiradi" },
+                    { uid: 'm11', daraja: "Past", muammo: "Zaryadnik kabeli type-c/lightning mos kelmasligi", oqibat: "Noto'g'ri ulagich xaridi va vozvratlar", yechim: "Ulagich modifikatorini majburiyligi", bito: "Buyurtma oldidan Type-C yoki Lightning tanlashni majburiy qilish", barer: "Qiyinlashadi", nima_uchun: "Bu mijozni noto'g'ri xariddan qutqaradi" },
+                    { uid: 'm12', daraja: "Kritik", muammo: "Quloqchinlar (Nauşnik) ovozini onlayn sinash imkonsizligi", oqibat: "Ovoz sifati yomon deb o'ylab xarid qilinmasligi", yechim: "Real mijozlar videosharlari", bito: "Mijozlarning ovoz sifatini tasdiqlagan sharhlarini biriktirish", barer: "Sharh yo'q", nima_uchun: "1 ta ishonchli video 100 ta savolni yopadi" },
+                    { uid: 'm13', daraja: "Yuqori", muammo: "Ekranga plonka yopishtirish xizmatini sota olmaslik", oqibat: "Mijoz faqat plonka olib o'zi yopishtirolmay asabiylashishi", yechim: "Qo'shimcha servis ulanishi", bito: "Plonkaga 'Ustaga yopishtirtirish + 10 ming' opsiyasini qo'shish", barer: "Kim keladi", nima_uchun: "Ofisga kelib olib ketish (Pick-up) trafigini oshiradi" },
+                    { uid: 'm14', daraja: "O'rta", muammo: "Smart soatlar tasmalarining (Remeshok) rangi ko'rinmasligi", oqibat: "Mijoz rangni tushunmay faqat qora rang sotib olishi", yechim: "Rangga qarab rasm o'zgarishi", bito: "Qizil rang tanlansa soat rasmi avtomatik qizilga o'zgarishi", barer: "Baza og'irlashishi", nima_uchun: "Varianatlar tizimi orqali juda yengil ishlaydi" },
+                    { uid: 'm15', daraja: "Kritik", muammo: "Srochniy dostavka (Telefon buzilganda zaryadchik kerakligi)", oqibat: "Kuryer 2 kunda borsa, mijoz ko'chadagi do'konga kirib ketadi", yechim: "Ekspress (Yandex) dostavka integratsiyasi", bito: "Buyurtma berilgan zahoti 'Tezkor yetkazish' tarifi orqali 1 soatda borishi", barer: "Qimmat", nima_uchun: "Muhtoj mijoz tezlik uchun 2 barobar to'lashga rozi" },
+                    { uid: 'm16', daraja: "Yuqori", muammo: "Kompyuter texnikasini oflayn yig'ish (Sborniy PK)", oqibat: "Xaridor qaysi plata qaysiga tushishini bilmay sotuvchining miyasini yeyishi", yechim: "PC Konstruktor formasi", bito: "Qismlar o'zaro mosligini tekshiruvchi teglangan tovarlar taklifi", barer: "Murakkab", nima_uchun: "Kategoriyalarni to'g'ri ulab qo'yish orqali hal qilinadi" },
+                    { uid: 'm17', daraja: "Past", muammo: "Geymerlar uchun maxsus aksessuarlar izlash azobi", oqibat: "Oddiy sichqonchalar orasida geymerlik anjomlari yo'qolishi", yechim: "Maxsus 'Gaming' bo'limi", bito: "O'yin aksessuarlari uchun vizual farq qiluvchi alohida kategoriya ochish", barer: "Dizayn buzilishi", nima_uchun: "BitoMarketda har bir kategoriyaga maxsus bannerlar qo'yish mumkin" },
+                    { uid: 'm18', daraja: "Yuqori", muammo: "Ehtiyot qismlari (Zapchast) displey qanaqaligini bilmaslik", oqibat: "Original ekran deb Xitoy nusxasini olib norozi bo'lish", yechim: "Kategoriyalashtirilgan sifat", bito: "Ekranlar uchun (TFT, OLED, Original) degan alohida narxlar yozilishi", barer: "Kim tushunadi", nima_uchun: "Kichik info-matn orqali farqi tushuntiriladi" },
+                    { uid: 'm19', daraja: "Kritik", muammo: "B/U (Ishlatilgan) telefonlarning ayblarini yashirish", oqibat: "Sotilgach 'bu qirilyapti' deb mijoz qaytarib kelishi", yechim: "Shaffof 'Holati' indikatori", bito: "B/U telefon uchun 'Kuzov 8/10, Batareya 85%' kabi aniq teglar berish", barer: "Sotilmay qoladi", nima_uchun: "To'g'risini aytish orqali narxini oqlaysiz va ishonch qozonasiz" },
+                    { uid: 'm20', daraja: "O'rta", muammo: "Telefon xotirasi (Memory) farqini va narxini tushuntirish", oqibat: "Mijoz nega 256GB qimmatligini so'rab uzoq savol-javob qilishi", yechim: "Variantlar (Variants) narxlari", bito: "Bitta tovar ichida 128GB, 256GB tugmalari turadi, bossa narx o'zgaradi", barer: "Aslohida tovar qilmoqchiman", nima_uchun: "Bitta kartochkada tutish mijozga solishtirish imkonini beradi" }
                 ],
                 restoran: [
                     { uid: 'r1', daraja: "Kritik", muammo: "Agregatorlar (Yandex/Uzum) 20-30% oladi", oqibat: "Foyda nolga teng, faqat agregator boyiydi", yechim: "O'z mustaqil dostavkangiz", bito: "0% komissiya. Barcha foyda o'zingizda qoladi", barer: "Reklama", nima_uchun: "O'z platformangiz orqali sadoqatli bazaga 0 so'm xarajat bilan sotasiz" },
-                    { uid: 'r2', daraja: "Kritik", muammo: "Operator xatosi (manzil/ingredient)", oqibat: "Ovqat sovishi, 'piyozsiz' degan mijoz bilan janjal", yechim: "Inson omilini yo'qotish", bito: "Mehmon o'zi manzilni va 'piyozsiz' deb belgilaydi", barer: "Kassaga ulanish", nima_uchun: "Ochiq API orqali mashhur tizimlar bilan integratsiya mavjud" }
+                    { uid: 'r2', daraja: "Kritik", muammo: "Operator xatosi (manzil/ingredient)", oqibat: "Ovqat sovishi, 'piyozsiz' degan mijoz bilan janjal", yechim: "Inson omilini yo'qotish", bito: "Mehmon o'zi manzilni va 'piyozsiz' deb belgilaydi", barer: "Kassaga ulanish", nima_uchun: "Ochiq API orqali mashhur tizimlar bilan integratsiya mavjud" },
+                    { uid: 'r3', daraja: "Kritik", muammo: "Stol band qilish (Bron) jarayonidagi xaos", oqibat: "Mijoz kelganda joy yo'qligi sababli asabiylashish", yechim: "Onlayn stol band qilish tizimi", bito: "MiniApp ichida mijoz bo'sh stollarni ko'rib arizani qoldiradi", barer: "Zal xaritasi", nima_uchun: "Tayyor soddalashtirilgan interaktiv bron paneli" },
+                    { uid: 'r4', daraja: "O'rta", muammo: "Ofitsiantlar menyuni va tarkibni bilmasligi", oqibat: "Sifatsiz servis va mijoz hafsalasi pir bo'lishi", yechim: "Batafsil raqamli menyu", bito: "QR orqali mijoz o'zi barcha ingredient va kalloriyani o'qiydi", barer: "Rasm yo'qligi", nima_uchun: "Matnli dizayn ham premium ko'rinishda taqdim etiladi" },
+                    { uid: 'r5', daraja: "O'rta", muammo: "Olib ketish (Takeaway) da mijoz uzoq kutib qolishi", oqibat: "Zalda asabiylashish va turnaqator navbatlar", yechim: "Tayyorlik statusi avtomatlashuvi", bito: "Ovqat tayyor bo'lganda tizim mijozga avtomatik Push yuboradi", barer: "Oshpazlar dasturi", nima_uchun: "Kassir 1 klikda buyurtma statusini o'zgartiradi" },
+                    { uid: 'r6', daraja: "Yuqori", muammo: "Tug'ilgan kun va banketlarni o'tkazib yuborish", oqibat: "Ushbu serdaromad banketlar boshqa joyga ketib qoladi", yechim: "Avto-sms tabriklar", bito: "Bot mijozga tug'ilgan kunida 20% chegirma yuboradi", barer: "Baza qayerdan", nima_uchun: "Xarid jarayonida tug'ilgan kun ixtiyoriy so'raladi" },
+                    { uid: 'r7', daraja: "Past", muammo: "Choy-chaqa (Tips) ni kartadan to'lay olmaslik", oqibat: "Ofitsiantlarning daromadi tushishi va motivatsiya yo'qolishi", yechim: "Elektron choy-chaqa moduli", bito: "QR orqali to'lovda 5%, 10% xizmat/tips qoldirish funksiyasi", barer: "Soliq", nima_uchun: "Tizim to'g'ridan to'g'ri tegishli terminallarga yo'naltira oladi" },
+                    { uid: 'r8', daraja: "Past", muammo: "Biznes-lanch va kompleks ovqatlarni yig'ish", oqibat: "Operator qaysi sho'rva va salatligini so'rab vaqt yo'qotishi", yechim: "Menyu konstruktori", bito: "Modifikatorlar orqali mijoz qaysi garnir kerakligini o'zi belgilaydi", barer: "Dasturda murakkab", nima_uchun: "Qo'shimchalar (shakar, garnir) qismi tayyor ishlangan" },
+                    { uid: 'r9', daraja: "Kritik", muammo: "Tungi yetkazib berishdagi ustama narxlarni tushuntirish", oqibat: "Mijoz tungi narx qimmatligini tushunmay janjal qiladi", yechim: "Vaqtga bog'liq dinamik narx", bito: "Tungi 23:00 dan keyin menyu narxlari avtomat o'zgaradi", barer: "Nazorat", nima_uchun: "Tizim taymer orqali hamma narsani inson ishtirokisiz boshqaradi" },
+                    { uid: 'r10', daraja: "Yuqori", muammo: "Ovqatning rasmdagidek ishtahali yetib bormasligi", oqibat: "Kutilma va reallik mos kelmasligi sababli yomon sharhlar", yechim: "Real videolar va sharhlar", bito: "Menyuga mukammal video-sharh va real otzivlarni biriktirish", barer: "Videoni olish", nima_uchun: "BitoMarketda katta hajmdagi videolar ham tezkor ochiladi" },
+                    { uid: 'r11', daraja: "Kritik", muammo: "Pik soatlarda telefon band bo'lishi", oqibat: "Mijoz tusholmay asabiylashib konkurentga zakaz qiladi", yechim: "Qo'ng'iroqsiz avtonom qabul", bito: "Mijoz telefonda gaplashmay 3 klikda zakazni oshxonaga tushiradi", barer: "App yuklash kerakmi?", nima_uchun: "Yo'q, hammasi to'g'ridan-to'g'ri Telegram ichida ishlaydi" },
+                    { uid: 'r12', daraja: "Yuqori", muammo: "Menyuning eskirishi va qog'oz xarajatlari", oqibat: "Narx o'zgarganda yana yangi menyu pechat qilishga sarf xarajatlar", yechim: "Raqamli bulutli menyu", bito: "Admin paneldan o'zgartirilgan narx shu soniyada stollardagi QR da o'zgaradi", barer: "Keksalarga qiyin", nima_uchun: "Interfeys shu qadar oddiyki, faqat rasmni bosib tanlanadi" },
+                    { uid: 'r13', daraja: "O'rta", muammo: "Sho'rvalar yoki suyuq ovqatlar yo'lda to'kilib ketishi", oqibat: "Kuryer xatosi deb ovqatni qaytarilishi va zarar", yechim: "Upakovka va logistika qoidalari", bito: "Suyuq ovqatga chek chiqganda kuryer uchun 'To'kiluvchan - Ehtiyot bo'ling' yozuvi chiqishi", barer: "Baribir to'kadi", nima_uchun: "Intizom va vizual ogohlantirish xatolikni 50% ga kamaytiradi" },
+                    { uid: 'r14', daraja: "Yuqori", muammo: "Vegan yoki Parhez (Diet) taomlarni topish qiyinligi", oqibat: "Maxsus dietadagi mijozlar hech narsa topolmay chiqib ketishi", yechim: "Maxsus teglar (Vegan, Halal)", bito: "Ovqatlar yonida 'Vegan' yashil belgisi va kaloriya hisobi turishi", barer: "Bunga vaqt ketadi", nima_uchun: "Sog'lom ovqatlanuvchilar eng sadoqatli, serdaromad mijozlardir" },
+                    { uid: 'r15', daraja: "O'rta", muammo: "Ofitsiantni chaqirish tugmasining yo'qligi", oqibat: "Mijoz zalda ofitsiant izlab uzoq kutishi", yechim: "QR orqali raqamli chaqiruv", bito: "Mijoz o'z telefonidan 'Ofitsiant chaqirish' tugmasini bosishi", barer: "R-keeperda yo'q", nima_uchun: "Tizim planshet orqali zaldagi xodimlarga signal beradi" },
+                    { uid: 'r16', daraja: "Past", muammo: "Aksiyalar (1+1) ni hisoblashdagi xaos", oqibat: "Ofitsiant adashib mijozdan ko'p pul olib qo'yishi va janjal", yechim: "Avtomatlashtirilgan promo tizim", bito: "Savatga 2 ta pitsa tushganda, tizim o'zi avtomatik tarzda narxni 1 tasinikiga tushiradi", barer: "Dastur qotishi", nima_uchun: "Matematik logikalar bulutda emas, brauzerni o'zida chaqmoqdek ishlaydi" },
+                    { uid: 'r17', daraja: "Yuqori", muammo: "Yangi taomni (Detox) menyuga kiritib sotolmaslik", oqibat: "Oshpaz yangi narsa o'ylab topadi, lekin mijozlar faqat eskilarini olaveradi", yechim: "Bosh sahifada 'Chef tavsiyasi'", bito: "Kirishdayoq katta bannerda yangi taomni eng zo'r rasmi bilan ko'rsatish", barer: "Hech kim qaramaydi", nima_uchun: "Birinchi ko'ringan narsa eng ko'p sotiladi (Marketing qoidasi)" },
+                    { uid: 'r18', daraja: "Kritik", muammo: "Pitsalarning xamiri (qalin/yupqa) sini so'rashni unutish", oqibat: "Mijoz yupqa xohlagan edi, qalin borib, norozi bo'lishi", yechim: "Majburiy modifikatorlar", bito: "Pitsa olinayotganda xamir turini tanlamaguncha savatga o'tmaslik", barer: "Mijozni qistash", nima_uchun: "Bu mijozga tanlov erkinligi va qayg'urish hissini beradi" },
+                    { uid: 'r19', daraja: "Past", muammo: "Restoran lokatsiyasini topa olmaslik", oqibat: "Mijoz adashib aylanib yurishi, asabiylashib boshqa joyga kirishi", yechim: "Kontaktlar va xarita integratsiyasi", bito: "MiniApp ichida 'Bizgacha yo'l' tugmasi bosilganda Yandex xaritani ochib berishi", barer: "Lokatsiya o'zgarsa", nima_uchun: "Admin paneldan 1 klikda manzilni yangilash mumkin" },
+                    { uid: 'r20', daraja: "Yuqori", muammo: "Uzoq masofaga (viloyatdan) yetkazishni so'rashlari", oqibat: "Kuryer bormaydigan joydan buyurtma tushib, uni bekor qilish azobi", yechim: "Yetkazib berish zonalari (Polygonlar)", bito: "Xaritada faqat o'z zonangizni chizib qo'yasiz, undan tashqariga zakaz o'tmaydi", barer: "Chizish qiyin", nima_uchun: "Radius (masalan 10 km) orqali avtomatik belgilab qo'yish eng oson yo'li" }
                 ],
                 beauty: [
                     { uid: 'b1', daraja: "Kritik", muammo: "Krem tarkibi va natijasi haqida cheksiz savollar", oqibat: "Menejer 40 minut vaqtini konsultatsiyaga sarflab charchaydi", yechim: "Batafsil ma'lumotli vitrina", bito: "Video, tarkibi va natijasi MiniApp-da to'liq yozilgan", barer: "Dastur narxi", nima_uchun: "Tayyor Enterprise platforma arzon obuna narxida" },
-                    { uid: 'b2', daraja: "Kritik", muammo: "Kosmetika yaroqlilik (srok) muddatining tez o'tishi", oqibat: "Moliyaviy zarar, molni tashlab yuborish yoki zararga sotish", yechim: "Tezkor aksiyalar vositasi", bito: "Push-xabar orqali 1 daqiqada butun bazaga aksiyani e'lon qilish", barer: "O'qilmasligi", nima_uchun: "Telegramda Open Rate 80% dan yuqori" }
+                    { uid: 'b2', daraja: "Kritik", muammo: "Kosmetika yaroqlilik (srok) muddatining tez o'tishi", oqibat: "Moliyaviy zarar, molni tashlab yuborish yoki zararga sotish", yechim: "Tezkor aksiyalar vositasi", bito: "Push-xabar orqali 1 daqiqada butun bazaga aksiyani e'lon qilish", barer: "O'qilmasligi", nima_uchun: "Telegramda Open Rate 80% dan yuqori" },
+                    { uid: 'b3', daraja: "Yuqori", muammo: "Mijozlar kremi tugaganda yangilashni unutishi", oqibat: "Barqaror (rekurrent) daromad yo'qolishi", yechim: "Mijozlar bazasi bilan ishlash", bito: "Avto-eslatma: 'SPF-kremingiz tugab qolgan bo'lsa kerak...'", barer: "Bezor qilish", nima_uchun: "Eslatmalar aqlli pauza bilan yuboriladi" },
+                    { uid: 'b4', daraja: "Yuqori", muammo: "Blogerlar reklamasining aniq ROI o'lchanmasligi", oqibat: "Qaysi reklama ish berganini bilmaslik, pulni sochish", yechim: "Aniq UTM va referal tahlili", bito: "Har bir blogerga alohida havola beriladi va barcha sotuv kuzatiladi", barer: "Bloger", nima_uchun: "Affiliate tizimi blogerga ham qancha ishlaganini ko'rsatadi" },
+                    { uid: 'b5', daraja: "Kritik", muammo: "Mijozning yuz terisiga mos krem tanlay olmasligi", oqibat: "Noto'g'ri tovar xaridi, allergiya va negativ holatlar", yechim: "Muammoga qarab filtrlar tizimi", bito: "Mijoz 'yog'li, quruq teri uchun' teglari orqali filtrlap qidiradi", barer: "Vaqt", nima_uchun: "Oson mahsulot tahrirlash oynasi orqali 1 marta kiritiladi" },
+                    { uid: 'b6', daraja: "O'rta", muammo: "Mutaxassisga (konsultatsiyaga) onlayn yozilish qiyinligi", oqibat: "Vaqtlar ustma-ust tushishi, mijozni ushlab qola olmaslik", yechim: "Onlayn yozilish (Booking)", bito: "MiniApp da xizmat turlari va vaqtlari bo'yicha yozilish imkoniyati", barer: "Chalkashish", nima_uchun: "BitoMarketda buyurtma turi 'Xizmat' qilib maxsus ajratiladi" },
+                    { uid: 'b7', daraja: "O'rta", muammo: "Parvarishlar ketma-ketligi (Box) sotish qiyinligi", oqibat: "O'rtacha chek pasayishi (Faqat 1 ta narsa olinishi)", yechim: "Tayyor to'plamlar (Bundles)", bito: "'Muammoli teri to'plami' degan tayyor mahsulot yaratish", barer: "Ombor hisobi", nima_uchun: "To'plam olinganda uning ichidagi tovarlar alohida ombordan yechiladi" },
+                    { uid: 'b8', daraja: "Past", muammo: "Testerlar yo'qligi onlayn xaridga to'siq bo'lishi", oqibat: "Xaridor 'hidini bilmasdan olmayman' deb ayniydi", yechim: "Mini-formatlar (Probniklar)", bito: "Tovarga modifikator sifatida 2 ml, 5 ml testerlarni qo'shish imkoni", barer: "Foyda kamligi", nima_uchun: "Testerlar keyinchalik katta hajm sotib olish ehtimolini 60% ga oshiradi" },
+                    { uid: 'b9', daraja: "Yuqori", muammo: "Allergik reaksiyalardan qo'rqish (Tarkibni yashirish)", oqibat: "Homiladorlar yoki ehtiyotkor mijozlarning xarid qilmasligi", yechim: "Batafsil Eco va Vegan yorliqlari", bito: "Sostav qismida alergenlarni qizil bilan yozib ogohlantirish", barer: "Mijoz qochadi", nima_uchun: "Ochiqlik va halollik brandga nisbatan eng katta sadoqatni shakllantiradi" },
+                    { uid: 'b10', daraja: "Kritik", muammo: "Kompleks parvarish bosqichlarini (Tonik, sivorotka) adashtirish", oqibat: "Noto'g'ri foydalanish oqibatida natija bo'lmasligi va salbiy sharh", yechim: "Qadam-ba-qadam yo'riqnoma", bito: "Kartochka ichida 1-qadam, 2-qadam tarzida vizual ko'rsatmalar", barer: "O'qishmaydi", nima_uchun: "Infografika matnga qaraganda 3 barobar yaxshi esda qoladi" },
+                    { uid: 'b11', daraja: "Yuqori", muammo: "Erkaklar o'ziga kosmetika (soch/soqol o'stiruvchi) olishga uyalishi", oqibat: "Do'konga kelib so'ramaydi, katta auditoriyani yo'qotish", yechim: "100% anonim raqamli xarid", bito: "Erkaklar bot orqali hech kimga ko'rinmay anonim tarzda zakaz beradi", barer: "Yetkazib berishda uyalish", nima_uchun: "Kuryerga yopiq 'qora paketda' sirli tarzda yetkazib berish sharti kiritiladi" },
+                    { uid: 'b12', daraja: "Kritik", muammo: "Tonal krem rangini onlayn tanlashdagi katta xatolar", oqibat: "Mijoz yuziga tushmaydigan rang olib, umuman qaytib kelmasligi", yechim: "Teri rangiga qarab vizual palitra", bito: "Ochiqdan to'q ranggacha bo'lgan maxsus rangli tugmachalar orqali tanlash", barer: "Rang kamerada aldaydi", nima_uchun: "Asosiy rasmda haqiqiy teri ustida qilingan svotchlar (chizmalar) ko'rsatiladi" },
+                    { uid: 'b13', daraja: "O'rta", muammo: "Shisha idishdagi qimmatbaho sivorotkalarni sinishi", oqibat: "Logistika vaqtida tovarning majaq bo'lishi va asab buzilishi", yechim: "Maxsus upakovka va logistika teglari", bito: "Buyurtmaga avtomat 'Shisha-Ehtiyot bo'ling' yorlig'i urilishi", barer: "Kuryer o'qimaydi", nima_uchun: "Chekda katta qizil harflar bilan ogohlantirish chiqadi" },
+                    { uid: 'b14', daraja: "Past", muammo: "Salonlarga ulgurji (Optom) sotishdagi narxlar xaoslari", oqibat: "Salonlarga 1 tadan narx aytib, ulgurji bazani yo'qotish", yechim: "Yopiq B2B narxlash tizimi", bito: "Faqat ro'yxatdan o'tgan salon ustalariga 30% arzon narxlar ko'rinishi", barer: "Oddiy mijoz ko'rib qolsa", nima_uchun: "Narxlar mijozning ID siga qarab maxfiylashtiriladi" },
+                    { uid: 'b15', daraja: "Yuqori", muammo: "Sovg'a to'plami (Podarochniy nabor) yig'ish uzoqligi", oqibat: "Yigitlar ayoliga nima olishni bilmay, oxiri gul olib qo'ya qolishi", yechim: "Tayyor yechimlar", bito: "'8-Mart uchun tayyor to'plam' degan maxsus kategoriya yaratish", barer: "Ichidagi narsasi yoqmasa", nima_uchun: "To'plamni ichini qisman o'zgartirish huquqini qoldirish mumkin" },
+                    { uid: 'b16', daraja: "Kritik", muammo: "Kosmetolog maslahatisiz kuchli kislotali kremlarni noto'g'ri olish", oqibat: "Mijozning yuzi kuyishi va do'konni sudga berishgacha borishi", yechim: "Xarid oldi ogohlantirish sharti", bito: "Kuchli kremlarni savatga qo'shishda 'Kosmetolog tavsiya qildimi?' galochkasi", barer: "Savdoni pasaytiradi", nima_uchun: "Bu huquqiy va ma'naviy jihatdan sizni 100% himoya qiladi" },
+                    { uid: 'b17', daraja: "Yuqori", muammo: "Kichik chekli (Faqat 1 ta qalam) xaridlarga qimmat dostavka", oqibat: "Dostavka tovardan qimmat chiqib mijoz sotib olmasligi", yechim: "Birlashtirilgan yetkazib berish (Yoki minimum sum)", bito: "Faqat 100,000 so'mdan oshganda dastavka bepul degan banner", barer: "Oshirmasa nima bo'ladi", nima_uchun: "O'rtacha chekni ataylab oshirish uchun upsell vositalari ishlaydi" },
+                    { uid: 'b18', daraja: "O'rta", muammo: "Yangi brendlarni tanitishdagi qiyinchilik (Hamma CeraVe oladi)", oqibat: "Yangi olib kelingan super-brendlarning omborda chang bosib yotishi", yechim: "Asosiy sahifadagi pop-uplar", bito: "MiniApp ochilishi bilan 'Bu CeraVedan 2 marta yaxshiroq' deb baner chiqishi", barer: "Odamlar o'qimay yopadi", nima_uchun: "Jozibali va intriga qiluvchi dizayn diqqatni 80% ushlab qoladi" },
+                    { uid: 'b19', daraja: "Past", muammo: "Mijozlarning 'Bu mening yoshimga tushadimi' degan savoli", oqibat: "Anti-age (Qarishga qarshi) kremlarni noto'g'ri yoshdagilar olishi", yechim: "Yoshga qarab toifalash", bito: "Menyuda '20+', '35+', '50+' degan aniq yosh ko'rsatkichli filtrlar", barer: "Ko'p vaqt ketadi", nima_uchun: "Navigatsiyani to'g'ri qurish 1 marta qilinadi va doimiy ishlaydi" },
+                    { uid: 'b20', daraja: "Yuqori", muammo: "Aksiya qachon tugashini bilmaslik (FOMO yo'qligi)", oqibat: "Mijoz 'Keyinroq olarman' deb chiqib ketishi va unutishi", yechim: "Teskari hisob taymeri", bito: "Aksiya tovarlarida 'Chegirma tugashiga: 12 soat 05 minut qoldi' deb vaqt sanashi", barer: "Buni qanday o'rnatamiz", nima_uchun: "BitoMarketda aksiyalarni vaqti tugashi bilan avtomat yopiladigan taymer bor" }
                 ],
                 med: [
-                    { uid: 'med1', daraja: "Kritik", muammo: "Dori nomlaridagi xatolar va noaniq retseptlar", oqibat: "Noto'g'ri dori sotish, salomatlikka xavf", yechim: "Rasmli qidiruv va tanlov", bito: "MiniApp-da qidiruv va qadoq rasmi orqali aniq dori tanlash", barer: "Baza kiritish", nima_uchun: "Dori bazalarini import qilish funksiyasi mavjud" }
+                    { uid: 'med1', daraja: "Kritik", muammo: "Dori nomlaridagi xatolar va noaniq retseptlar", oqibat: "Noto'g'ri dori sotish, salomatlikka xavf", yechim: "Rasmli qidiruv va tanlov", bito: "MiniApp-da qidiruv va qadoq rasmi orqali aniq dori tanlash", barer: "Baza kiritish", nima_uchun: "Dori bazalarini import qilish funksiyasi mavjud" },
+                    { uid: 'med2', daraja: "Yuqori", muammo: "Samovivoz uchun bron yo'qligi sabab dori tugab qolishi", oqibat: "Mijoz yetib kelguncha oxirgi dori sotilib ketishi va janjal", yechim: "Onlayn rezervatsiya tizimi", bito: "'Olib ketaman' tugmasi bosilsa, mol bazadan yechilib zaxiralanadi", barer: "Logistika", nima_uchun: "Navbatda turmaydi, faqat buyurtma raqamini aytib olib ketadi" },
+                    { uid: 'med3', daraja: "Kritik", muammo: "Retseptli dorilarni masofadan sotish qiyinligi", oqibat: "Mijoz noiloj oflayn dorixonaga ketib qolishi", yechim: "Retseptni rasmga olib jo'natish", bito: "Bot orqali retsept rasmini tashlab bemalol tasdiqlatib buyurtma berish", barer: "Qonunchilik", nima_uchun: "Rasm to'g'ridan-to'g'ri litsenziyali farmatsevt tekshiruviga tushadi" },
+                    { uid: 'med4', daraja: "Yuqori", muammo: "Surunkali kasallar dorilarini har safar qayta izlashi", oqibat: "Mijozning qayta qidirishga erinib raqobatchiga o'tishi", yechim: "Doimiy xaridlar ro'yxati (Reorder)", bito: "Mijoz o'zining avvalgi buyurtmasini 1 klikda qayta savatga soladi", barer: "Unutishi", nima_uchun: "Bot 1 oydan keyin dori tugayotganini eslatadi" },
+                    { uid: 'med5', daraja: "O'rta", muammo: "Dorilarning o'zaro ta'siri (Muvofiqlik) ni bilmaslik", oqibat: "Mijoz mustaqil xarid qilolmasligi, yon ta'sirlardan qo'rqish", yechim: "Batafsil ko'rsatmalar", bito: "Dori ta'rifi qismida to'liq tibbiy yo'riqnomani (instruksiya) joylash", barer: "Matn sig'masligi", nima_uchun: "Cheklanmagan matn va qulay shriftlar ishlatiladi" },
+                    { uid: 'med6', daraja: "O'rta", muammo: "Vitamin va BFQlar effektiga ishonchsizlik", oqibat: "Odamlar ta'siriga ishonmay arzonini qidirishi", yechim: "Otziv va Feedback yig'ish", bito: "2 haftadan so'ng bot dori ta'sirini so'rab yozadi", barer: "Yozmaydi", nima_uchun: "Otziv uchun keyingi xaridga promo-kod avtomatik beriladi" },
+                    { uid: 'med7', daraja: "Kritik", muammo: "Nozik dorilar (Gemorroy, ZPPP) oflayn olishga uyalish", oqibat: "Mijoz dorixonada aytishga uyalib chiqib ketib qolishi", yechim: "100% anonim onlayn buyurtma", bito: "Telefon ekrani orqali hech kimga aytmasdan sokin buyurtma berish", barer: "Uyalish", nima_uchun: "Dorixona ichida yopiq paketda faqat buyurtma raqami bilan beriladi" },
+                    { uid: 'med8', daraja: "Yuqori", muammo: "Shifokorlar bilan ishlash (Referal xaoslari)", oqibat: "Qaysi vrachdan mijoz kelganini hisoblay olmaslik", yechim: "Shaxsiy referal tizim", bito: "Har bir vrach uchun maxsus havola beriladi va komissiya hisoblanadi", barer: "Boshqarish", nima_uchun: "Hamkorlik paneli kim qancha ishlaganini ko'rsatib turadi" },
+                    { uid: 'med9', daraja: "Kritik", muammo: "Dori dozirovkasini adashtirish (50mg o'rniga 100mg)", oqibat: "Og'ir tibbiy oqibatlar, janjal va dorini qaytarish", yechim: "Majburiy tanlash paneli", bito: "Katta qizil tugmalarda 50mg, 100mg modifikatorlarni tanlamay o'tolmaslik", barer: "Adashish", nima_uchun: "Savatga o'tishda dozani yana bir bor tasdiqlash uchun ko'rsatamiz" },
+                    { uid: 'med10', daraja: "Yuqori", muammo: "Retsept muddatining o'tib ketganligini tekshirish azobi", oqibat: "Eski retsept bilan dori sotish, jarimaga tortilish", yechim: "Muddatni nazorat qiluvchi ariza tizimi", bito: "Rasmni yuklaganda sana ko'rinishi va operator tezkor bloklashi", barer: "Tekshirish vaqti", nima_uchun: "Operator paneli barcha ma'lumotni 1 ta oynada qulay qilib beradi" },
+                    { uid: 'med11', daraja: "Kritik", muammo: "Kechasi shoshilinch dori kerak bo'lishi", oqibat: "Tunda apteka topolmay qiynalish, raqobatchiga borish", yechim: "24/7 ishlovchi qabul bloki", bito: "Telegram bot tungi operator uxlab yotganda ham avtomat zakazni olib tasdiqlaydi", barer: "Dostavka bo'lmasa", nima_uchun: "Hech bo'lmasa ertalabgacha bron qilib qo'yish asabni tinchlantiradi" },
+                    { uid: 'med12', daraja: "O'rta", muammo: "Analog va o'rinbosar dorilarni taklif qila olmaslik", oqibat: "Asl dori bo'lmasa mijoz 'yo'q ekan' deb chiqib ketishi", yechim: "O'xshash tovarlar moduli", bito: "Mahsulot ostida 'Buning o'rniga bularni olishingiz mumkin' deb arzonroq analog chiqadi", barer: "Mijoz ishonmasligi", nima_uchun: "Tarkibi bir xilligini vizual ko'rsatib ishonch berish mumkin" },
+                    { uid: 'med13', daraja: "Yuqori", muammo: "Yosh cheklovi (Detkam nelzya) bolalarga mumkinmasligi", oqibat: "Ota-onalar noto'g'ri dori olib bolaga berib qo'yishi xavfi", yechim: "Ogohlantiruvchi qizil teglar", bito: "Mahsulot kartochkasida '12 yoshgacha taqiqlanadi' qizil belgisi qo'yiladi", barer: "O'qimay oladi", nima_uchun: "Shu belgi qonuniy javobgarlikdan aptekani 100% halos qiladi" },
+                    { uid: 'med14', daraja: "Past", muammo: "Sirop yoki Tabletka ekanligini rasmda bilmaslik", oqibat: "Sirop icholmaydigan bolaga sirop olib qo'yib norozi bo'lish", yechim: "Qadoq turlarini aniq yozish", bito: "Dori nomiga '[Sirop 100ml]' deb shaklini to'liq qo'shib yozish stardarti", barer: "Uzun bo'lib ketadi", nima_uchun: "Qisqa yozgandan ko'ra aniq yozish dorixona sohasida eng muhimi" },
+                    { uid: 'med15', daraja: "Kritik", muammo: "Harorat rejimini (Xolodilnik) talab qiluvchi dorilar (Insulin)", oqibat: "Issiqda yetkazish orqali dorini o'ldirish va zaxarlash", yechim: "Logistikada maxsus termo-sumka tarifi", bito: "Bunday dori savatga tushganda faqat 'Termo-yetkazib berish' tanlanadi", barer: "Kuryerga tushuntirish", nima_uchun: "Tizim kuryerga termo-sumkasiz bormaslikni chekda qat'iy uqtiradi" },
+                    { uid: 'med16', daraja: "Yuqori", muammo: "Dorilarni ommaviy xarid qilish (Kasalxonalar uchun)", oqibat: "Ulgurji (Optom) narxni hisoblashda kalkulyatorda adashish", yechim: "Hajmga qarab chegirma (Volume discount)", bito: "10 tadan ortiq olsa avtomat 15% chegirma hisoblanishi", barer: "Qiyin sozlash", nima_uchun: "BitoMarketda ulgurji qoidalar 2 marta bosish orqali o'rnatiladi" },
+                    { uid: 'med17', daraja: "O'rta", muammo: "Sroki o'tib ketgan retseptlarni tekshirish mexanizmi yo'qligi", oqibat: "Nazorat idoralari tomonidan dorixonaga jinoiy ish ochilishi xavfi", yechim: "Retsept sanasini kiritish", bito: "Ariza qoldirishda retsept yozilgan sanani majburiy kiritish talabi", barer: "Mijoz yolg'on yozsa", nima_uchun: "Sanasi kiritilganidan so'ng rasm bilan solishtirish ancha tezlashadi" },
+                    { uid: 'med18', daraja: "Yuqori", muammo: "Mavsumiy dori-darmonlar (Gripp) qoldig'i tugashi", oqibat: "Aynan mavsumda eng xaridorgir dori qolmay biznesni qotishi", yechim: "Qoldiqlar kamayganda SMS ogohlantirish", bito: "Omborda 10 ta qolganda egasiga 'Zaxirani to'ldiring' degan signal borishi", barer: "Har kun xabar kelishi", nima_uchun: "Faqat siz tanlagan eng muhim dori (Top-20) larda shu funksiya yonadi" },
+                    { uid: 'med19', daraja: "Past", muammo: "Vitaminlar majmuasini (Kompleks) alohida izlash", oqibat: "Mijoz C vitamini oladi-yu, unga mos Rux (Sink) olishni bilmaydi", yechim: "Biriktirilgan savat (Upsell)", bito: "D vitamini olinganda 'Sink bilan birga yaxshi ta'sir qiladi' taklifi chiqishi", barer: "Aql o'rgatish", nima_uchun: "Bu meditsina sohasida mijozga qayg'urishning eng oliy ko'rinishi" },
+                    { uid: 'med20', daraja: "Kritik", muammo: "Homiladorlikda mumkin bo'lmagan dorilarni sotish", oqibat: "Bola tushishi yoki og'ir asoratlar sababli katatsrofa", yechim: "Ogohlantiruvchi Pop-up oyna", bito: "Dori ustiga bosilganda 'Homiladorlarga mumkin emas!' deb qizil oyna chiqishi", barer: "Sotuvni tushirishi", nima_uchun: "Sog'liqni saqlash biznesidagi eng muhim narsa - Xavfsizlik." }
                 ],
                 parfum: [
-                    { uid: 'p1', daraja: "Kritik", muammo: "Raspis (2, 5, 10 ml) narx-navo hisobidagi xaos", oqibat: "Menejer xatosi, chalkashlik va mijozning uzoq kutishi", yechim: "Hajm bo'yicha dinamik vitrina", bito: "Mijoz '5 ml' tugmasini bossa, narx shunga mos o'zi avtomatik o'zgaradi", barer: "Dizayn", nima_uchun: "Lyuks brendlar darajasidagi vizual estetika" }
+                    { uid: 'p1', daraja: "Kritik", muammo: "Raspis (2, 5, 10 ml) narx-navo hisobidagi xaos", oqibat: "Menejer xatosi, chalkashlik va mijozning uzoq kutishi", yechim: "Hajm bo'yicha dinamik vitrina", bito: "Mijoz '5 ml' tugmasini bossa, narx shunga mos o'zi avtomatik o'zgaradi", barer: "Dizayn", nima_uchun: "Lyuks brendlar darajasidagi vizual estetika" },
+                    { uid: 'p2', daraja: "Kritik", muammo: "Notalar haqidagi cheksiz tushuntirishlar", oqibat: "Menejerlar har kuni 'hidi qanaqa' degan savolga javob yozishdan 'kuyadi'", yechim: "Barcha ma'lumotlar vizual taqdimoti", bito: "Notalar (yuqori, o'rta, asos) MiniApp-da chiroyli ajratib yoziladi", barer: "So'rashaveradi", nima_uchun: "Vitrinaga o'rgangan mijozlar vizual axborotni osonroq qabul qiladi" },
+                    { uid: 'p3', daraja: "Kritik", muammo: "Qalbaki (Poddelka) emasligiga ishonchsizlik", oqibat: "Qimmat atirni onlayn ko'rmay olishdan qo'rqish", yechim: "Otzivlar va sertifikatlar moduli", bito: "Kartochkada real xaridorlar sharhi va original sertifikat rasmini ko'rsatish", barer: "Ishonch", nima_uchun: "Haqiqiy foydalanuvchilar qoldirgan sharh ishonchni 70% oshiradi" },
+                    { uid: 'p4', daraja: "Kritik", muammo: "Qadoqning (Upakovka) yo'lda ezilishi yoki shikastlanishi", oqibat: "Qimmatbaho atir ko'rinishining buzilishi va vozvrat", yechim: "Logistikada ehtiyotkorlik statusi", bito: "Buyurtma shaklida kuryer uchun 'Extiyot bo'ling - Shisha' degan yirik belgi", barer: "E'tiborsizlik", nima_uchun: "Qimmatbaho tovarlar uchun ishonchli tariflarga API orqali ulash imkoni" },
+                    { uid: 'p5', daraja: "Yuqori", muammo: "Sovg'a uchun atir tanlash azobi", oqibat: "Mijoz tanlay olmay vaqt yo'qotadi va voz kechadi", yechim: "Tayyor takliflar yechimi", bito: "MiniApp da 'Sovg'a to'plamlari' maxsus kategoriyasini yaratish", barer: "Nima berishni bilmaydi", nima_uchun: "Gender va yosh bo'yicha tayyor teglangan tovarlar (Erkaklar uchun)" },
+                    { uid: 'p6', daraja: "Yuqori", muammo: "Atirning qancha vaqt turishi (Stoykost) haqidagi savollar", oqibat: "Mijoz 1 kunda uchib ketishidan xavotir olib savol beraverishi", yechim: "Davomiylik (Stoykost) shkalasi", bito: "Kartochkada 1 dan 10 gacha bo'lgan vizual stoykost grafikasini chizish", barer: "Teri har xil", nima_uchun: "Grafika ostida 'Teringiz turiga qarab o'zgarishi mumkin' eslatmasi" },
+                    { uid: 'p7', daraja: "O'rta", muammo: "Test qilib ko'rmay qimmat atir olish qo'rquvi", oqibat: "Xaridor 'hidini bilmasdan 100$ ga olmayman' deb ayniydi", yechim: "Sempllar (Mini-format) taklifi", bito: "Tovarga modifikator sifatida 2 ml testerlarni arzon narxda qo'shish imkoni", barer: "Foyda kam", nima_uchun: "Testerlar keyinchalik katta hajm sotib olish ehtimolini keskin oshiradi" },
+                    { uid: 'p8', daraja: "O'rta", muammo: "Parfum to'plamlarini alohida sotish qiyinligi", oqibat: "Mijoz bittasini oladi, to'plam qolib ketadi", yechim: "Tavsiyalar va Chegirma", bito: "3 ta olsangiz 10% chegirma kabi aksiyalarni avtomatlashtirish", barer: "Hisoblash", nima_uchun: "Savat tizimi o'zi aksiyani hisoblab chekni to'g'irlaydi" },
+                    { uid: 'p9', daraja: "Past", muammo: "Atir hidini ta'riflovchi vizual his-tuyg'ular yo'qligi", oqibat: "Matn bilan hidni yetkazib berolmaslik", yechim: "Moodboard va Assotsiativ videolar", bito: "Har bir atir uchun uning atmosferasini beruvchi video-banner qo'yish", barer: "Qotishi", nima_uchun: "BitoMarket videolarni YouTube yoki CDN orqali engil yuklaydi" },
+                    { uid: 'p10', daraja: "Past", muammo: "Qadoqlash xizmati (Upakovka) tanlash imkoni yo'qligi", oqibat: "Mijoz sovg'a o'rash uchun alohida do'konga borishiga to'g'ri keladi", yechim: "Qo'shimcha savdo (Cross-sell)", bito: "To'lov oldidan 'Sovg'a qilib o'rash (+50 ming)' degan modifikator chiqishi", barer: "Logistikasi", nima_uchun: "Chekda upakovka qilinganligi oshxonadagidek aniq ko'rsatiladi" },
+                    { uid: 'p11', daraja: "Yuqori", muammo: "Yoz va Qish parfyumlari adashishi", oqibat: "Yozda o'tkir qish atirini olib nafasi qaytishi va brandni yomon ko'rib qolishi", yechim: "Mavsumiy filtrlar", bito: "Katalogda 'Yoz uchun yengil', 'Qish uchun issiq' teglari bo'yicha saralash", barer: "Har kimni tabi har xil", nima_uchun: "Bu vizual yordam mijozning miyasiga bosim tushishini yengillashtiradi" },
+                    { uid: 'p12', daraja: "Kritik", muammo: "Atir shleyfi (Sillage) qanaqaligini bilmaslik", oqibat: "Mijoz atiridan hid qolmayapti deb puli kuyganini his qilishi", yechim: "Shleyf indikatori", bito: "Tovar sahifasida shleyf uzunligini ko'rsatuvchi 3 ta yulduzchali indikator", barer: "O'lchab bo'lmaydi", nima_uchun: "Bu asosan marketing elementi bo'lib, mijozni ishonchini qozonadi" },
+                    { uid: 'p13', daraja: "Yuqori", muammo: "Celebrity (Mashhurlar) qaysi atirni sepishini izlash", oqibat: "Mijoz 'Xande Ercel' qaysi atir sepyapti deb izlab vaqt yo'qotishi", yechim: "Trendlar va mashhurlar tanlovi bo'limi", bito: "Alohida kategoriya: 'Gollivud yulduzlari tanlagan iforlar'", barer: "Mualliflik huquqi", nima_uchun: "Rasmlarsiz, shunchaki fakt sifatida matnli teglar qilib ishlatsa bo'ladi" },
+                    { uid: 'p14', daraja: "O'rta", muammo: "Arzon 'Miks' va Moyli atirlarni sotish xaos", oqibat: "Flakon, gramm va moyni alohida hisoblashda chalkashlik", yechim: "Kompleks konstruktor", bito: "Idishni tanlash -> Moyni grammda tanlash ketma-ketligidagi modifikator", barer: "Mijoz tushunmaydi", nima_uchun: "Qadam-ba-qadam (Step 1, Step 2) formasi mijozni o'zi yetaklaydi" },
+                    { uid: 'p15', daraja: "O'rta", muammo: "Oflayn butikda maslahatchini uzoq kutib qolish", oqibat: "Kutishdan zerikkan mijoz xarid qilmay ketib qolishi", yechim: "Raqamli yordamchi (QR)", bito: "Tester tagidagi QR ni o'qitib telefonida shu atirni haqida to'liq o'qish", barer: "Baribir inson kerak", nima_uchun: "Introvert (uyatchan) mijozlar uchun bu eng zo'r yechim" },
+                    { uid: 'p16', daraja: "Past", muammo: "Eski bo'sh flakonlarni (Refill) nima qilishni bilmaslik", oqibat: "Atrof-muhit va mijozning puli behuda isrof bo'lishi", yechim: "Refill (Qayta to'ldirish) tizimi", bito: "Eski flakonni qaytarsangiz 10% chegirma beriladigan raqamli promo-kod", barer: "Xarajat", nima_uchun: "Mijozni doimiy (LTV) ushlab qolishning eng arzon va ekologik yo'li" },
+                    { uid: 'p17', daraja: "Kritik", muammo: "Parfum komponentlaridan allergiya chiqish xavfi", oqibat: "Qichishish, toshma toshishi va salbiy sud ishlari", yechim: "Allergen ogohlantirishlari", bito: "Tarkib qatorida kuchli sintetik allergenlarni aniq va qalin qilib yozish", barer: "Sotuv tushishi", nima_uchun: "Faqat sezgir terililar uchun kerak, asosan bu sadoqatni bildiradi" },
+                    { uid: 'p18', daraja: "Yuqori", muammo: "Qimmat atirlarni rassrochka (Muddatli to'lov) ga berolmaslik", oqibat: "Aholi daromadi yetmay, asosan qalbaki atirlarni olishga majburligi", yechim: "Muddatli to'lov kalkulyatori", bito: "300$ lik atir tagida 'Oyiga 30$ dan Uzum Nasiya' orqali olish opsiyasi", barer: "Foizlar", nima_uchun: "Tayyor integratsiyalar hamma hujjatlarni avtomat hal qiladi" },
+                    { uid: 'p19', daraja: "O'rta", muammo: "Xuddi shu atirning body-lotion yoki kremini taklif qilolmaslik", oqibat: "Kompleks savdoni (Cross-sell) boy berish va foydadan quruq qolish", yechim: "Iforni to'ldiruvchi tovarlar", bito: "Savatda avtomatik 'Xuddi shu atir hidiga ega krem' taklif qilinishi", barer: "Assortiment yo'q", nima_uchun: "Sotuvga kiritilsa tizim uni avtomatik bog'lay oladi" },
+                    { uid: 'p20', daraja: "Past", muammo: "Erkaklarning do'konda ayollar atirini qidirib xijolat bo'lishi", oqibat: "Directda maslahat so'rashdan uyalishi, javobsiz qolishi", yechim: "Teglangan gender katalog", bito: "Botga kirishdayoq 'Kim uchun qidiryapsiz?' deb 2 ta chiroyli bo'lim chiqishi", barer: "Arzon dizayn", nima_uchun: "Zamonaviy UI-dizayn mijozga premium jurnaldan xarid qilayotgandek tuyg'u beradi" }
                 ],
                 kiyim: [
-                    { uid: 'k1', daraja: "Kritik", muammo: "O'lcham/rangda adashish (Kichkina yoki katta kelishi)", oqibat: "Vozvrat (qaytish) va ikki barobar logistika xarajati", yechim: "Mijoz o'zi parametrlarni kiritishi", bito: "S, M, L o'lcham va rangni aynan mahsulot ichida tanlash majburiyligi", barer: "Sayt narxi", nima_uchun: "IT infratuzilma qimmat emas - arzon oylik obunada beriladi" }
+                    { uid: 'k1', daraja: "Kritik", muammo: "O'lcham/rangda adashish (Kichkina yoki katta kelishi)", oqibat: "Vozvrat (qaytish) va ikki barobar logistika xarajati", yechim: "Mijoz o'zi parametrlarni kiritishi", bito: "S, M, L o'lcham va rangni aynan mahsulot ichida tanlash majburiyligi", barer: "Sayt narxi", nima_uchun: "IT infratuzilma qimmat emas - arzon oylik obunada beriladi" },
+                    { uid: 'k2', daraja: "Kritik", muammo: "Matoning sifati va teksturasi rasmda bilinmasligi", oqibat: "Kutishlar oqlanmasligi, 'rasmdagidek emas ekan' degan e'tiroz", yechim: "Batafsil Zoom va Video", bito: "Mahsulot suratini yaqinlashtirish (Zoom) va mato videosini yuklash", barer: "Cheklov", nima_uchun: "Yuqori sifatli rasmlar va videolarni cheklovsiz joylash mumkin" },
+                    { uid: 'k3', daraja: "Kritik", muammo: "Modelning bo'yi va kiygan o'lchamini bilmaslik", oqibat: "Mijoz 'menga kaltamasmi' deb ikkilanishi", yechim: "Model parametrlari belgisi", bito: "Rasmlar ostida 'Modelning bo'yi 175 sm, kiygan o'lchami M' yozuvi", barer: "Ma'lumot", nima_uchun: "Oddiy tekst formati buni oson ko'rsatishga yordam beradi" },
+                    { uid: 'k4', daraja: "Yuqori", muammo: "Kiyimni kiyib ko'rish (Primerka) talabi va qaytarish qo'rquvi", oqibat: "O'lchami to'g'ri kelmasa qaytarolmayman deb umuman xarid qilmaslik", yechim: "Shaffof qaytarish siyosati", bito: "Mahsulot ostida 'Uyingizda kiyib ko'ring, mos kelmasa qaytaramiz' yozuvi", barer: "Kuryer uzoq kutadi", nima_uchun: "Yetkazib berish sozlamalarida primerka shartlari va vaqtini yozish mumkin" },
+                    { uid: 'k5', daraja: "Yuqori", muammo: "Mavsum oxirida eski kolleksiyaning qolib ketishi", oqibat: "Omborda pullarning muzlashi va aylanmaning sekinlashishi", yechim: "Ommaviy Sale (Chegirma)", bito: "Katalogda 'SALE' maxsus bo'limi va ustiga chizilgan eski narxlar", barer: "Yozish azobi", nima_uchun: "Ommaviy ravishda barcha maxsulotlarga % yoki so'mda chegirma qo'llash" },
+                    { uid: 'k6', daraja: "Yuqori", muammo: "Mato tarkibini (Sostav: 80% paxta) tinimsiz so'rashlari", oqibat: "Terlatadigan sintetika ekan deb gumon qilib sotib olmaslik", yechim: "Infografika va parametrlar", bito: "Parametrlar bo'limida 'Paxta 80%, Elastan 20%' kabi ma'lumotni vizual berish", barer: "Zerikarli", nima_uchun: "Mass update orqali yuzlab tovarlarga 1 minutda qo'shiladi" },
+                    { uid: 'k7', daraja: "O'rta", muammo: "Luk (Look - To'liq obraz) yig'ish muammosi", oqibat: "Mijoz faqat shim oladi, unga tushadigan koftani topolmaydi", yechim: "Tavsiyalar tizimi (Cross-sell)", bito: "Mahsulot ostida 'Bu shim bilan mos tushadigan koftalar' bloki chiqadi", barer: "Avtomatika", nima_uchun: "Kategoriyalar asosida tizim o'zi o'xshash tovarlarni tavsiya qiladi" },
+                    { uid: 'k8', daraja: "O'rta", muammo: "Sertifikatlar (Podarochniy) sotishni faqat oflayn qilish", oqibat: "Onlayn tezkor sovg'a qilmoqchi bo'lgan xaridorlarni yo'qotish", yechim: "Raqamli sovg'a sertifikatlari", bito: "Bot orqali virtual sovg'a sertifikatlarini sota olish va yuborish", barer: "Ishlatishi", nima_uchun: "Sertifikat promo-kod ko'rinishida generatsiya qilinadi va avtomat ishlaydi" },
+                    { uid: 'k9', daraja: "O'rta", muammo: "Rangi yuvilganda chiqib ketishidan yoki kirishishidan qo'rqish", oqibat: "Qimmatbaho buyumni yuvishga ehtiyot bo'lib, ikkilanish", yechim: "Parvarishlash yo'riqnomasi", bito: "BitoMarketda '30 gradusda yuvilsin' kabi belgilarni (ikonkalar) qo'yish", barer: "Dizayn", nima_uchun: "Ikonkalar kichik va juda estetik ko'rinishda joylashtiriladi" },
+                    { uid: 'k10', daraja: "Past", muammo: "Oyoq kiyimlarida 'Podyom' yoki kenglik muammosi", oqibat: "Razmer to'g'ri bo'lsa-da, qolipi tor kelishi", yechim: "Batafsil o'lchamlar jadvali", bito: "Mahsulot tavsifida razmerka setkasi (Smetr) ni vizual ko'rsatish", barer: "O'qimaydi", nima_uchun: "Chiroyli pop-up oynada eng kerakli ma'lumotlar vizual beriladi" },
+                    { uid: 'k11', daraja: "Kritik", muammo: "Iste'molchi terrorizmi (Kiyib qaytarish muammosi)", oqibat: "To'yga kiyib, ertasiga 'rasmdagidek emas ekan' deb qaytarish va zarar", yechim: "Ommaviy raqamli oferta va shartlar", bito: "To'lovdan oldin 'Faqat yorlig'i uzilmagan holda qaytariladi' shartiga rozilik olish", barer: "Qonunchilik", nima_uchun: "Elektron oferta yuridik jihatdan do'konni bunday firibgarlardan asraydi" },
+                    { uid: 'k12', daraja: "Yuqori", muammo: "Homilador ayollar uchun maxsus kiyimlarni topish qiyinligi", oqibat: "Tug'ruq oldi ayollar o'ziga mosini topolmay siqilishi", yechim: "Maxsus 'Maternity' filtrlari", bito: "Homiladorlar uchun maxsus erkin bo'chimdagi kiyimlar bo'limi yaratish", barer: "Alohida model tikish", nima_uchun: "Bor bo'lgan 'Oversize' kiyimlarni shu tegga kiritishning o'zi yetarli" },
+                    { uid: 'k13', daraja: "O'rta", muammo: "Uzun bo'yli (Tall) yoki to'ladan kelganlarga (Plus Size) topilmasligi", oqibat: "Standart razmerga tushmagan qatlamning hafsalasi pir bo'lishi", yechim: "Kengaytirilgan o'lchamlar paneli", bito: "Faqat XS-L emas, balki XXL+ va 'Tall' formatlarni alohida tugmalarda ko'rsatish", barer: "Kam sotiladi", nima_uchun: "Plus Size segmenti raqobati kam bo'lgan eng xaridorgir joy hisoblanadi" },
+                    { uid: 'k14', daraja: "Kritik", muammo: "Yengi, etagi va yelka uzunligining aniq sm lari yo'qligi", oqibat: "Mijoz bo'yiga tushadi deb oladi, lekin kalta kelib qoladi", yechim: "Batafsil Razmer Setkasi (Grid)", bito: "Har bir razmer uchun S - (Bo'yi: 110sm, Yengi: 60sm) qilib jadval kiritish", barer: "O'lchab chiqish vaqti", nima_uchun: "1 marta o'lchash 100 ta qaytish (vozvrat) ni oldini oladi" },
+                    { uid: 'k15', daraja: "Yuqori", muammo: "Hijobli (Yopiq) kiyimlarning rasmda shaffofligini bilmaslik", oqibat: "Ko'chada kiyib bo'lmaydigan darajada yupqaligidan norozilik", yechim: "Quyosh nuri ostidagi videolar", bito: "Matoning qanchalik qalinligini ko'rsatuvchi yorug'likdagi video sharh", barer: "Qimmat s'yomka", nima_uchun: "BitoMarketda iPhone da olingan tabiiy videolar eng zo'r ishonch beradi" },
+                    { uid: 'k16', daraja: "Past", muammo: "Erkaklar va Ayollar kiyimining aralashib ketishi (Xaos)", oqibat: "Erkaklar o'ziga shim qidirib ayollar yubkasi ichida adashib ketishi", yechim: "Kirishdayoq qat'iy segmentatsiya", bito: "Katalogga kirganda 1-ekran 'Erkaklar', 'Ayollar', 'Bolalar' deb tanlatish", barer: "Mijoz bosishga erinadi", nima_uchun: "Bu eng qulay UX qadam, chalkashlikni oldini oladi" },
+                    { uid: 'k17', daraja: "O'rta", muammo: "Kamarga yoki sumkaga o'xshash aksessuarlarni sotolmaslik", oqibat: "Katta daromad keltiruvchi mayda tovarlarning chang bosib yotishi", yechim: "Savatdagi impulsiv takliflar", bito: "To'lov oldidan tagida 'Balki bu ajoyib kamar ham kerakdir?' bloki", barer: "Mijoz asabiylashadi", nima_uchun: "Yo'q, bu tasdiqlangan impulsiv cross-sell strategiyasi" },
+                    { uid: 'k18', daraja: "Kritik", muammo: "Mahalliy ishlab chiqaruvchini (Made in UZ) deb mensimaslik", oqibat: "Odamlar chet elniki sifatli deb o'ylab bizning mahsulotni olmasligi", yechim: "Premium brending va Vizual", bito: "Telegram MiniApp shunday chiroyli qilinadiki, Xitoy emas Yevropa brendi deb o'ylashadi", barer: "Bunga dizayner kerak", nima_uchun: "BitoMarketning default (standart) dizayni o'zi premium darajada" },
+                    { uid: 'k19', daraja: "Yuqori", muammo: "Pre-order (Oldindan buyurtma) yig'ishning qiyinligi", oqibat: "Turkiyadan kelayotgan molga oldindan mijoz yig'a olmaslik", yechim: "Kutish ro'yxati va 50% to'lov", bito: "Tovar statusida 'Kutilyapti', va 'Band qilish' tugmasi orqali to'lov qabul qilish", barer: "Mijoz kutmaydi", nima_uchun: "Kutish uchun 10-15% lik chegirma bering, ular xursand kutishadi" },
+                    { uid: 'k20', daraja: "Past", muammo: "Faqat issiq fasllarda ishlab, qishda savdoni tushishi (Mavsumiylik)", oqibat: "Yilning yarmida daromadning deyarli nolga tushishi", yechim: "Mijozlar bazasi (CRM) bilan ishlash", bito: "Yozda ko'ylak olganlarga qishda 'Yangi issiq kurtkalarimiz keldi' deb SMS yuborish", barer: "Raqamlarni yo'qotish", nima_uchun: "CRM tizimida barcha mijozlar tarixi oylarga bo'linib saqlanadi" }
                 ],
                 elektronika: [
-                    { uid: 'e1', daraja: "Kritik", muammo: "Muddatli to'lov (Rassrochka) hisob-kitobidagi tushunmovchilik", oqibat: "Mijoz foizlarni ko'rib qo'rqib qochib ketishi", yechim: "Shaffof kalkulyator", bito: "Mahsulot ostida 'Oyiga 300,000 so'mdan' degan hisoblagich turishi", barer: "Banklar", nima_uchun: "Tayyor integratsiyalar (masalan, Alif yoki Uzum Nasiya) ulash imkoni" }
+                    { uid: 'e1', daraja: "Kritik", muammo: "Muddatli to'lov (Rassrochka) hisob-kitobidagi tushunmovchilik", oqibat: "Mijoz foizlarni ko'rib qo'rqib qochib ketishi", yechim: "Shaffof kalkulyator", bito: "Mahsulot ostida 'Oyiga 300,000 so'mdan' degan hisoblagich turishi", barer: "Banklar", nima_uchun: "Tayyor integratsiyalar (masalan, Alif yoki Uzum Nasiya) ulash imkoni" },
+                    { uid: 'e2', daraja: "Kritik", muammo: "Katta gabaritli texnikalarni (Muzlatgich) logistikasi", oqibat: "Dostavka narxi oxirida qimmat chiqib, mijoz rad etishi", yechim: "Manzil va qavatga qarab narxlash", bito: "Buyurtma berishda etajni ko'rsatish va shunga qarab dostavka narxlash", barer: "Kuryerlar", nima_uchun: "Hamma narx oldindan chekda aniq ko'rsatilgan bo'ladi" },
+                    { uid: 'e3', daraja: "Kritik", muammo: "Qimmat texnika uchun oflayn ishonch qidirish", oqibat: "Televizorni onlayn olishga qo'rqib ishonchli joy qidirishi", yechim: "Oflayn nuqtalar xaritasi", bito: "Kontaktlar bo'limida lokatsiyalar, filiallar va ishonch elementlari", barer: "Oflayn", nima_uchun: "Kafolat, qaytarish shartlari sahifasi mijoz ishonchini tiklaydi" },
+                    { uid: 'e4', daraja: "Kritik", muammo: "Murakkab texnikani ulanish va sozlash (Nastroyka)", oqibat: "Ishlatolmay asabiylashib texnikani qaytarib yuborish (Vozvrat)", yechim: "Avtomatlashgan video-yo'riqnoma", bito: "Tovarni olgach, bot avtomat tarzda 'Qanday ulash kerak' videosini yuboradi", barer: "Video yo'q", nima_uchun: "Faqat murakkab turlarga biriktirib chiqish o'zi yetarli" },
+                    { uid: 'e5', daraja: "Yuqori", muammo: "Texnik xarakteristikalarni solishtirish (Sravnenie) imkoni yo'qligi", oqibat: "Mijoz 2 ta telefon o'rtasida tanlay olmay oxiri olmaydi", yechim: "Solishtirish moduli", bito: "Mijoz tovarlarni belgilab qaysi jihati kuchliroq ekanini aniq ko'radi", barer: "Qimmat", nima_uchun: "BitoMarketda professional e-commerce yechimlari jamlangan" },
+                    { uid: 'e6', daraja: "Yuqori", muammo: "Qo'shimcha servislar sotolmaslik (Konditsioner o'rnatish)", oqibat: "Qo'shimcha katta marja (foyda) keltiruvchi xizmatlarning sotilmasligi", yechim: "Upsell va Xizmatlar biriktirish", bito: "Savatda 'O'rnatib berish + 200,000 so'm' degan modifikator chiqishi", barer: "Ustalar", nima_uchun: "Usta uchun ham buyurtmada aniq vazifa va narx belgilanadi" },
+                    { uid: 'e7', daraja: "Yuqori", muammo: "Kafolat talonini qog'ozda yozish (Yo'qolish xavfi)", oqibat: "Qog'oz yirtilib ketsa mijoz bepul servisdan mahrum bo'ladi", yechim: "SMS orqali Elektron Kafolat", bito: "Xariddan so'ng bot orqali E-Kafolat raqami mijozga yetkazilishi", barer: "Servis", nima_uchun: "Tizim rasmiy QR kod bilan PDF formatdagi talon beradi" },
+                    { uid: 'e8', daraja: "O'rta", muammo: "Eski texnikani yangisiga almashtirish (Trade-In) jarayoni", oqibat: "Uzoq davom etuvchi baholash va chatdagi kelishmovchiliklar", yechim: "Maxsus Trade-in arizasi", bito: "Mijoz telefonining rasmini va holatini bot orqali baholashga yuboradi", barer: "Rasmiylashtirish", nima_uchun: "Barcha arizalar yagona admin panelda qulay ko'rinadi" },
+                    { uid: 'e9', daraja: "O'rta", muammo: "Xitoy yoki Global versiya ekanligini adashtirish", oqibat: "Mijoz tilni o'zgartira olmaydi, norozilik va qaytarish", yechim: "Aniq modifikatorlar (Versiyalar)", bito: "Tovar tanlayotganda mijoz o'zi 'Global' yoki 'Xitoy' ni belgilaydi", barer: "Narx", nima_uchun: "Global tanlansa narx o'z-o'zidan mos ravishda qimmatlashadi" },
+                    { uid: 'e10', daraja: "Past", muammo: "Komplektatsiya va qutida nima borligini so'rashlari", oqibat: "Zaryadchik bormi, g'ilof bormi deb yuzlab savollar kelishi", yechim: "To'liq axborot arxitekturasi", bito: "Tavsifda 'Qutidagi narsalar' bloki aniq ko'rinib turishi", barer: "Erinish", nima_uchun: "1 marta sifatli mahsulot kartochkasi yuzlab savollarni yopadi" },
+                    { uid: 'e11', daraja: "Past", muammo: "Ehtiyot qismlari (Zapchast) topish qiyinligi", oqibat: "Odamlar ehtiyot qismini qidirishda qiyinchilikka uchrashi", yechim: "Aqlli qidiruv va filtrlash", bito: "Qidiruv tizimi yozuvdagi xatolar bilan yozsa ham to'g'ri topadi", barer: "Baza o'ta kattaligi", nima_uchun: "Minglab tovarlarni yuklash va teglash tizimi optimallashtirilgan" },
+                    { uid: 'e12', daraja: "Kritik", muammo: "Katta tok kuchlanishi (Volt) ga mos kelmasligi (Xavfsizlik)", oqibat: "Texnikaning yonib ketishi va katta modiy zarar", yechim: "Texnik ogohlantirish teglari", bito: "Xarakteristikada 'Diqqat: 220V ga moslashmagan' deb katta yozuv qoldirish", barer: "Sotuv tushadi", nima_uchun: "O'rniga 'Perehodnik' (O'tkazgich) ni modifikator qilib sotish orqali foyda qilasiz" },
+                    { uid: 'e13', daraja: "Yuqori", muammo: "Akkumulyator va Batareykaning hajmi haqida tushunmovchilik", oqibat: "Mijoz 'bu necha soat ishlaydi' deb so'raverib asabni egovlashi", yechim: "Tushunarli insoniy tildagi matn", bito: "5000 mAh emas, 'Videoda 12 soat tinimsiz ishlaydi' deb yozish", barer: "Test qilish kerak", nima_uchun: "Texnik raqamlarni odamlar tiliga o'girish konversiyani 40% oshiradi" },
+                    { uid: 'e14', daraja: "Kritik", muammo: "Kutilgan yangi modellarning (iPhone 16) chiqqanini hammaga aytish", oqibat: "Mijozlar bilmay, boshqa joydan birinchi bo'lib olib qo'yishi", yechim: "Ommaviy Push va Pre-order", bito: "Barcha bazaga 'Yangi model keldi - Birinchilardan bo'lib bron qiling' SMSi", barer: "Bloklash xavfi", nima_uchun: "Kutilgan tovarlar haqidagi xabarlar bloklanmaydi, aksincha xursandchilik beradi" },
+                    { uid: 'e15', daraja: "Yuqori", muammo: "Aqlli uy (Smart Home) qurilmalarini biriktirish muammosi", oqibat: "Mijoz bitta rozetka oladi, lekin uni boshqaradigan xab(hub)ni unutadi", yechim: "Ekotizim tarzida taklif (Bundle)", bito: "Rozetka savatga tushganda avtomatik ravishda unga mos Hub ham chiqishi", barer: "Moslashtirish", nima_uchun: "Tizimdagi tovarlarni bir-biriga moslab teglar orqali ulab qo'yish juda oson" },
+                    { uid: 'e16', daraja: "O'rta", muammo: "Rangi bo'yicha narxning o'zgarishi (Oq - arzon, Qora - qimmat)", oqibat: "Mijoz nega qorasi qimmat ekanligidan norozi bo'lishi", yechim: "Rang modifikatorlari asosida dinamik narx", bito: "Mijoz o'zi rangni tanlaganda, ustiga '+200,000 sum' deb ochiq yozib qo'yilishi", barer: "Norozilik", nima_uchun: "Oldindan va shaffof ko'rsatilgan narxlarga odamlar kam e'tiroz bildiradi" },
+                    { uid: 'e17', daraja: "Yuqori", muammo: "Ishlatilgan (B/U) yoki Refurbished texnikalarni sotish", oqibat: "Mijoz yangi deb o'ylab olib, keyin mojaroga sabab bo'lishi", yechim: "Qat'iy holat ko'rsatkichi", bito: "Tovar nomidayoq '[Qayta tiklangan]' degan qizil tamg'ani o'rnatish", barer: "Sotilishi qiyin", nima_uchun: "Buni ataylab arzon qidiruvchilarga targ'ib qilish uchun alohida kategoriya ochiladi" },
+                    { uid: 'e18', daraja: "O'rta", muammo: "B2B va Ofislar uchun ommaviy texnika xaridlarini qabul qilish", oqibat: "Kompaniyalar bilan qog'ozbozlik va invoyslarda adashish", yechim: "Yuridik shaxslar uchun maxsus form", bito: "Oddiy mijoz o'rniga, Kompaniya rekvizitlarini kiritib shartnoma generatsiya qilish", barer: "Bugalteriya ulanishi", nima_uchun: "Sotuv va Invoys BitoMarketda tayyor generatsiya bo'ladi" },
+                    { uid: 'e19', daraja: "Past", muammo: "TV uchun qavs (Kronshteyn) yoki noutbuk uchun sumkani taklif etishni unutish", oqibat: "Asosiy qimmat tovarni sotib, ko'p marjali aksessuarda foydani boy berish", yechim: "Majburiy to'ldiruvchi taklif", bito: "Noutbukni rasmiylashtirish tugmasidan oldin pop-upda 'Sichqoncha olinadimi?' deb so'rash", barer: "Bezor qilish", nima_uchun: "Mijozga aslida kerak narsani taklif qilish - bu servisdir" },
+                    { uid: 'e20', daraja: "Kritik", muammo: "Qimmat noutbukning rasmda plastik yoki metall ekanligini ajratolmaslik", oqibat: "Arzon plastmassa noutbuk olib qo'ydim deb mijozning norozi bo'lishi", yechim: "Premium vizualizatsiya va 3D", bito: "Material teksturasini ko'rsatuvchi yuqori sifatli makrolinzali rasmlarni cheklovsiz joylash", barer: "Sayt qotishi", nima_uchun: "BitoMarket og'ir rasmlarni ham optimallashtirib tezkor ko'rsatadi" }
                 ],
                 mebel: [
-                    { uid: 'meb1', daraja: "Kritik", muammo: "Mebelning xonaga sig'ishini (Razmerlar) tushunmaslik", oqibat: "Sotib olgach xonaga sig'maydi, mebel qaytariladi", yechim: "Batafsil chizmalar va o'lchamlar", bito: "Rasmlar ichida mebelning Uzunlik/Kenglik/Balandlik sxemasini joylash", barer: "Adashish", nima_uchun: "Buyurtma berganda 'O'lchamni tekshirdim' degan galochka qo'yadi" }
+                    { uid: 'meb1', daraja: "Kritik", muammo: "Mebelning xonaga sig'ishini (Razmerlar) tushunmaslik", oqibat: "Sotib olgach xonaga sig'maydi, mebel qaytariladi", yechim: "Batafsil chizmalar va o'lchamlar", bito: "Rasmlar ichida mebelning Uzunlik/Kenglik/Balandlik sxemasini joylash", barer: "Adashish", nima_uchun: "Buyurtma berganda 'O'lchamni tekshirdim' degan galochka qo'yadi" },
+                    { uid: 'meb2', daraja: "Kritik", muammo: "Katta mebellarni logistikasi (Etajga chiqarish narxi)", oqibat: "Kuryer 'etajga 50 ming' desa mijozning hafsalasi pir bo'lishi", yechim: "Shaffof yetkazish shartlari", bito: "Etajni tanlashga qarab dostavka narxi rasmiy hisoblab beriladi", barer: "Qimmat", nima_uchun: "Mijozlar shaffoflikni va oldindan kutilgan xarajatni yaxshi ko'radi" },
+                    { uid: 'meb3', daraja: "Kritik", muammo: "Mebel rasmda katta ko'rinib, hayotda kichik chiqishi", oqibat: "Mijoz 'kreslo kichkina ekan' deb hafsalasi pir bo'lishi", yechim: "Real masshtabli rasmlar", bito: "Mahsulot yonida odam turgan qo'shimcha rasmlar ko'rsatish", barer: "Rasmga olish", nima_uchun: "BitoMarket xohlagancha qo'shimcha rasmlarni bepul saqlaydi" },
+                    { uid: 'meb4', daraja: "Yuqori", muammo: "Rangi va materiali (Mato) ni rasmda his qilmaslik", oqibat: "Rangi xonaga tushmaydi deb xaridni oxirgi bosqichda to'xtatish", yechim: "Sifatli video va 3D", bito: "Mebelning barcha rakursdan olingan sifatli videosharlari", barer: "Sayt og'irlashishi", nima_uchun: "Videolar Telegram MiniApp ichida YouTube/CDN orqali qotmaydi" },
+                    { uid: 'meb5', daraja: "Yuqori", muammo: "Usta chaqirish va yig'ish (Sborniy) xizmatini qo'shib sotish", oqibat: "Mijoz mebelni o'zi yig'olmay ustani boshqa joydan izlashi", yechim: "Qo'shimcha xizmatlar (Upsell)", bito: "Savatda 'Yig'ib berish +100 ming so'm' xizmati tanlash imkoni", barer: "Usta", nima_uchun: "Dostavka bilan birga ustaga alohida status tushadi" },
+                    { uid: 'meb6', daraja: "Yuqori", muammo: "Kutish vaqti (Na zakaz 20 kun) ni mijozga aytmaslik", oqibat: "3 kundan so'ng 'Qani mebelim?' degan janjallar", yechim: "Tovarlarga 'Na zakaz' statusini qo'yish", bito: "Mahsulot nomida aniq qizil yozuv: 'Buyurtma asosida 20 kun'", barer: "Kutish", nima_uchun: "To'g'ri kutish sozlamasi negativni 90% ga qisqartiradi" },
+                    { uid: 'meb7', daraja: "Yuqori", muammo: "Materialning suvga/issiqqa chidamliligi haqida shubhalar", oqibat: "Arzon laminat yoki DSP dan qilingan deb ishonmaslik", yechim: "Crash-test videolari", bito: "Stol ustiga choy to'kib ko'rsatilgan qisqa videolarni biriktirish", barer: "Fayl hajmi", nima_uchun: "Telegram ichida qisqa GIF va videolar bir zumda yuklanadi" },
+                    { uid: 'meb8', daraja: "O'rta", muammo: "Modulli mebellarni (Oshxona) yig'ishdagi qiyinchilik", oqibat: "Mijoz turli qismlarni hisoblab chiqolmay charchab ketishi", yechim: "Bo'limlar va Kategoriyalash", bito: "Oshxona modullari (Shkaf, Stol, Polka) yagona to'plamda ko'rsatiladi", barer: "Hisoblash", nima_uchun: "Tizim har bir qo'shilgan modul hisobiga chekni o'zi yig'ib boradi" },
+                    { uid: 'meb9', daraja: "O'rta", muammo: "Komplekt sotolmaslik (Stol va stullarni alohida izlash)", oqibat: "Mijoz faqat stol oladi, stul izlashga erinib sotuv tushadi", yechim: "Biriktirilgan tovarlar", bito: "Stol sahifasida 'Bu stolga eng mos stullar' taklifi chiqib turadi", barer: "Ulash qiyin", nima_uchun: "Teglar yordamida avtomatik o'xshash mahsulotlar chiqadi" },
+                    { uid: 'meb10', daraja: "Past", muammo: "Boshqa mebellar bilan dizayn mosligiga shubha", oqibat: "Mijoz 'uyimga tusharmikin' deb sotib olmasligi", yechim: "Konsultatsiya arizasi", bito: "'Dizayner maslahati kerak' tugmasi orqali arizalar qabul qilish", barer: "Xodim yo'qligi", nima_uchun: "Bitta mutaxassis barcha onlayn arizalarni paneldan ko'rib turadi" },
+                    { uid: 'meb11', daraja: "Past", muammo: "Eskirgan mebelni olib chiqib ketish xizmati muammosi", oqibat: "Yangi mebel olganda eskisini nima qilishni bilmaslik", yechim: "Ekstra xizmatlar", bito: "Buyurtma berishda 'Eski mebelni olib ketish' xizmatini qo'shish imkoni", barer: "Daxmaza", nima_uchun: "Bu mijoz qarorini 30% ga tezlashtiruvchi kuchli Triger hisoblanadi" },
+                    { uid: 'meb12', daraja: "Kritik", muammo: "Uy hayvonlari (Mushuk) matoni yirtib yuborishidan xavotir", oqibat: "Mijoz qimmat divanni olib ko'chaga tashlashdan qo'rqishi", yechim: "Maxsus 'Anti-kogot' filtrlari", bito: "Mato turlari bo'yicha 'Hayvonlarga chidamli' degan maxsus kategoriya qo'shish", barer: "Matoni izlash", nima_uchun: "Mijoz to'g'ridan-to'g'ri o'z muammosiga (uy hayvoni) yechim topadi" },
+                    { uid: 'meb13', daraja: "Yuqori", muammo: "Maxsus o'lchamda (Zakazga) qilingan mebel narxini hisoblash", oqibat: "Directda uzun SMSlar va har bir sm uchun narx talashish", yechim: "Interaktiv kalkulyator va Murojaat", bito: "O'z razmerlarini kiritib taxminiy hisob-kitobni qabul qilib oluvchi ariza formasi", barer: "Aniq narx emas", nima_uchun: "Taxminiy narx mijozni tayyorlaydi va arzon bo'lsa darhol xaridga undaydi" },
+                    { uid: 'meb14', daraja: "Kritik", muammo: "Yotoqxona mebeliga to'shak (Matras) ni alohida sotish qiyinligi", oqibat: "Krovatni sotib, eng ko'p daromad beruvchi matras sotuvini o'tkazib yuborish", yechim: "Majburiy to'plam yoki Chegirmali paket", bito: "Krovat sahifasida 'Matras bilan olsangiz 15% chegirma' tugmasi turishi", barer: "Qimmat bo'ladi", nima_uchun: "Chegirma miqyosi xarajatdan ustun keladi va impulsiv xaridni oshiradi" },
+                    { uid: 'meb15', daraja: "O'rta", muammo: "Matolarning turli ranglarini (Katalogini) tushuntirish", oqibat: "Bitta divanning 50 xil rangi borligini mijoz bilmay chiqib ketishi", yechim: "Variantlar galereyasi", bito: "Har bir rangni kichik dumaloq tugmachalarga joylab, ustiga bosa rang o'zgarishi", barer: "Rasmlar ko'pligi", nima_uchun: "Tizim ularni optimallashtirilgan holda juda qulay ko'rinishda beradi" },
+                    { uid: 'meb16', daraja: "Yuqori", muammo: "Kafolat muddati (Karkas va Mexanizm uchun) ishonchsizligi", oqibat: "Bir yildan keyin prujinasi sinib qoladi deb o'ylab arzonroq joy izlashi", yechim: "Ishonch hujjatlari va Kafolat sahifasi", bito: "Bosh sahifada 'Karkasga 5 yil kafolat' degan katta yorliq va sertifikatlar", barer: "Isbot yo'qligi", nima_uchun: "Elektron talonlar xarid jarayonida mijozning botiga avtomat tushadi" },
+                    { uid: 'meb17', daraja: "Past", muammo: "Mebel bilan birga yoritish (Podsvetka) sotolmaslik", oqibat: "Kichik qo'shimchalardan (Aksessuarlar) keladigan foydadan voz kechish", yechim: "Modifikator sifatida qoshish", bito: "Shkaf olayotganda tagida 'LED podsvetka qo'shish +150,000 so'm'", barer: "Mijoz tushunmaydi", nima_uchun: "Tanlov ixtiyoriy, ammo ko'pchilik qulaylik uchun qo'shish tugmasini bosadi" },
+                    { uid: 'meb18', daraja: "Yuqori", muammo: "Ergonomika va yosh bolalar xavfsizligi (O'tkir burchaklar)", oqibat: "Ota-onalar 'Bolam urib oladi' deb qimmat mebelni rad etishi", yechim: "Maxsus xavfsizlik ikonkalari", bito: "Tavsifda 'Yumaloqlangan burchak, xavfsiz qirralar' degan vizual teglarni qo'yish", barer: "Dizaynni buzadi", nima_uchun: "Aksincha, foydali xususiyatlar tovar qadrini ikki marta oshiradi" },
+                    { uid: 'meb19', daraja: "O'rta", muammo: "Ish stoli va kreslolarning og'irlikni ko'tarish layoqati", oqibat: "Katta vaznli mijozlar 'Bu sinib qoladi' deb o'ylab olmasligi", yechim: "Xarakteristikada aniq vazn indeksi", bito: "Aniq faktlar: 'Maksimal yuk: 150 kg gacha' deb jadvalda ajratib ko'rsatish", barer: "Oddiy gap", nima_uchun: "Kichik detallar katta ishonchsizliklarni osongina chetlab o'tishga yordam beradi" },
+                    { uid: 'meb20', daraja: "Kritik", muammo: "Uyga yetkazilganda eshikdan sig'may qolish muammosi", oqibat: "100 km joyga borib, eshikka sig'magani uchun ortga qaytib kelishi va zarar", yechim: "Buyurtma berishdan oldingi ogohlantirish", bito: "Eshik va lift o'lchamlari 80 sm dan katta ekanini tasdiqlovchi check-box (galochka)", barer: "Mijoz qochishi", nima_uchun: "Bu ikkala tomonni ham bo'lajak asabbuzarlikdan himoya qiladi" }
                 ],
                 bolalar: [
-                    { uid: 'kid1', daraja: "Kritik", muammo: "Bolaning tez o'sishi sabab razmerni topa olmaslik", oqibat: "Qidiruvda vaqt yo'qotib, xaridorning asabiylashishi", yechim: "Yoshga qarab aqlli qidiruv", bito: "Katalog '0-3 yosh', '3-6 yosh' teglari orqali aniq filtrlarga ega", barer: "Teglar", nima_uchun: "BitoMarketda tovar kiritishda yosh toifalari belgilash juda oson" }
+                    { uid: 'kid1', daraja: "Kritik", muammo: "Bolaning tez o'sishi sabab razmerni topa olmaslik", oqibat: "Qidiruvda vaqt yo'qotib, xaridorning asabiylashishi", yechim: "Yoshga qarab aqlli qidiruv", bito: "Katalog '0-3 yosh', '3-6 yosh' teglari orqali aniq filtrlarga ega", barer: "Teglar", nima_uchun: "BitoMarketda tovar kiritishda yosh toifalari belgilash juda oson" },
+                    { uid: 'kid2', daraja: "Kritik", muammo: "Ota-onalarning vaqti yo'qligi (Tezkor pampers/pyure)", oqibat: "Vaqt kutishga toqat yo'q, mijoz eng yaqin do'konga tushadi", yechim: "Tezkor yetkazib berish va oson xarid", bito: "App qidirmay Telegram o'zidan 3 klikda pampers zakaz qilish", barer: "Dostavka", nima_uchun: "Bot orqali buyurtma 1 sekda kassaga boradi" },
+                    { uid: 'kid3', daraja: "Kritik", muammo: "Bolaning mato yoki o'yinchoq materialidan allergiyasi", oqibat: "Sintetika deb o'ylab xarid qilmaslik", yechim: "Gipoallergen va Eco yorliqlari", bito: "Katalogda '100% Paxta' va 'Gipoallergen' teglari orqali filtrlash", barer: "Teglar", nima_uchun: "Ota-onalar farzandi sog'lig'i uchun aynan shu filtrlarni izlashadi" },
+                    { uid: 'kid4', daraja: "Yuqori", muammo: "O'yinchoqlarning xavfsizligi va materiali bo'yicha xavotir", oqibat: "Xitoyning arzon toksik plastikasi deb o'ylab xarid qilmaslik", yechim: "Sertifikatlar va material kafolati", bito: "Tavsifda 'Eko material, xavfsiz' emblemalarini joylash", barer: "Ishonch", nima_uchun: "Sifat sertifikatlari skanerlarini rasmlarga qo'shish ishonch beradi" },
+                    { uid: 'kid5', daraja: "Yuqori", muammo: "Yangi tug'ilgan chaqaloqlarga to'plam (Vipiska) yig'ish", oqibat: "Birma-bir yig'ish odamni charchatadi va sotuv parchalanadi", yechim: "Bundle (To'plamlar) xizmati", bito: "'Tug'ruqxona uchun tayyor sumka' degan tayyor mahsulot yaratish", barer: "Bitta narsa", nima_uchun: "Ichidagi tovarlarni o'zgartirish imkoni ham bor" },
+                    { uid: 'kid6', daraja: "Yuqori", muammo: "Bolalar bayrami (Tug'ilgan kun) ga eslatma yo'qligi", oqibat: "Sodiq ota-onalar farzandi tug'ilgan kunida boshqa joydan sovg'a olishi", yechim: "CRM va avto-eslatma", bito: "Tug'ilgan kundan 1 hafta oldin bot ota-onaga maxsus chegirma yuboradi", barer: "Yoshi", nima_uchun: "Birinchi xaridda farzandi tug'ilgan oyi so'rab olinadi" },
+                    { uid: 'kid7', daraja: "Yuqori", muammo: "Mavsumiy tovarlar (Maktab formasi) ni ommaviy xarid qilish", oqibat: "Do'konga kelganda razmerlar qolmagan bo'lishi va norozilik", yechim: "Ommaviy bron qilish (Pre-order)", bito: "Ota-onalar mavsumdan oldin onlayn buyurtma va to'lov qilib qo'yishi", barer: "Ishonch", nima_uchun: "Rasmiy Telegram do'koni 100% kafolat hissini beradi" },
+                    { uid: 'kid8', daraja: "O'rta", muammo: "Gender (O'g'il / Qiz) bo'yicha sovg'a izlash azobi", oqibat: "Sovg'a qidirgan qarindoshlarning tanlay olmasligi", yechim: "Tayyor to'plamlar va bo'limlar", bito: "'Qizlar uchun', 'O'g'il bolalar uchun' alohida maxsus bo'limlar", barer: "Menyu", nima_uchun: "Iyerarxik va qulay dizaynli menyu xaridni soddalashtiradi" },
+                    { uid: 'kid9', daraja: "O'rta", muammo: "Interaktiv o'yinchoqlar qanday ishlashini tushunmaslik", oqibat: "Rasmiga qarab qiziqmaslik va xarid qilmaslik", yechim: "Video va Gif ko'rsatmalar", bito: "O'yinchoq qanday ishlashi va ovoz chiqarishini videoda ko'rsatish", barer: "Video hajmi", nima_uchun: "Video yuklash tezligi optimallashtirilgan" },
+                    { uid: 'kid10', daraja: "Past", muammo: "Katta o'yinchoqlar (Kolyaska) yig'ish instruksiyasi yo'qligi", oqibat: "Uyga borgach yig'a olmaslik, asabiylashish va qaytarish", yechim: "Raqamli ko'rsatmalar", bito: "Tovar sahifasida 'Qanday yig'ish kerak' videosiga to'g'ridan to'g'ri havola", barer: "Vaqt ketadi", nima_uchun: "1 ta video 100 ta mijozning negativini oldini oladi" },
+                    { uid: 'kid11', daraja: "Kritik", muammo: "Egizaklar yoki ko'p farzandlilar uchun qimmatlik", oqibat: "Oilaga ikki barobar tushadigan narx sabab onlayn xaridni rad etish", yechim: "Maxsus 'Egizaklar uchun' chegirmalar", bito: "Bir xil tovardan 2 ta olinganda avtomatik 15% chegirma hisoblanishi", barer: "Boshqalar olsa", nima_uchun: "Bu faqat savatda ommaviy xaridni rag'batlantiruvchi aqlli skript" },
+                    { uid: 'kid12', daraja: "Yuqori", muammo: "O'yinchoqlarning maqsadi (Edu/Rivojlantiruvchi) ni bilmaslik", oqibat: "Ota-onalar 'bu oddiy ekan' deb qimmat intellektual o'yinni olmasligi", yechim: "Ko'nikmalarni rivojlantiruvchi teglar", bito: "Tavsifda 'Motorikani rivojlantiradi', 'Mantiqiy fikrlash' degan alohida qatorlar", barer: "O'qishmaydi", nima_uchun: "Sog'lom rivojlanish haqidagi info ota-onalarni darhol sotib olishga majbur qiladi" },
+                    { uid: 'kid13', daraja: "Yuqori", muammo: "Bola sevgan qahramon (Spiderman/Elsa) bo'yicha qidiruv yo'qligi", oqibat: "Barcha narsalar orasidan aniq qahramonni topolmay vaqt yo'qotish", yechim: "Qahramonlar bo'yicha kolleksiyalar", bito: "Katalogda maxsus 'Multfilm qahramonlari' bo'limida teglash orqali ajratish", barer: "Trend o'zgarishi", nima_uchun: "Admin paneldan teglarni yangi multfilm qahramonlariga 1 klikda o'zgartirish mumkin" },
+                    { uid: 'kid14', daraja: "O'rta", muammo: "Kiyimlarni tozalash (Yuvish) murakkabligi qo'rquvi", oqibat: "Oq yoki yorqin rangli qimmat kurtkalarni tez kirlanadi deb olmaslik", yechim: "Matoning tozalanish xususiyati vizuali", bito: "Rasmlar orasida 'Suv va kir yuqtirmaydigan qatlam' degan infografika qo'yish", barer: "Isboti nima", nima_uchun: "Qisqacha video gif orqali ko'rsatilsa ishonch 100% ga chiqadi" },
+                    { uid: 'kid15', daraja: "O'rta", muammo: "Kichik chaqaloqlar uchun ozuqa (Pyure)larni ulgurji ololmaslik", oqibat: "1-2 ta dan olib dostavkaga ko'p pul ketishini o'ylab voz kechish", yechim: "Boks (Quti) qilib sotish qulayligi", bito: "Alohida variant sifatida 1 dona va 12 talik karobkani narxi bilan ko'rsatish", barer: "Zaxira nazorati", nima_uchun: "Karobka tanlansa, bazadan avtomat ravishda 12 ta yechiladi" },
+                    { uid: 'kid16', daraja: "Kritik", muammo: "O'yinchoq ichida batareykasi bor-yo'qligini aytmaslik", oqibat: "Bola sovg'ani ochganda ishlamasligi, yig'lashi va do'konga bo'lgan g'azab", yechim: "Qo'shimcha 'Cross-sell' modifikatori", bito: "Savatga o'tayotganda 'Batareyka qo'shish +15000 so'm' degan majburiy tanlov chiqishi", barer: "Arzimagan narsa", nima_uchun: "Bu servis sizni boshqa yuzlab oddiy do'konlardan ajratib turadi" },
+                    { uid: 'kid17', daraja: "Yuqori", muammo: "Maxsus dietali bolalar uchun (Lakttozasiz) oziq-ovqat topish", oqibat: "Noto'g'ri bo'tqa (kasha) olish orqali bolani kasal qilib qo'yish", yechim: "Tibbiy standartdagi aqlli filtrlar", bito: "Katalogda 'Shakarsiz', 'Lakttozasiz', 'Glutensiz' kabi hayotiy muhim filtrlar", barer: "Tizim qotishi", nima_uchun: "Filtrlar sonidan qat'i nazar MiniApp hech qachon sekinlashmaydi" },
+                    { uid: 'kid18', daraja: "Past", muammo: "Bayram uchun chiroyli o'rab berish (Upakovka) ni unutish", oqibat: "Mijoz yana boshqa joydan sovg'a paketi izlab ovora bo'lishi", yechim: "Sovg'a sifatida rasmiylashtirish", bito: "Buyurtma yakunida 'Tabriknoma yozish va chiroyli o'rash' degan maxsus blok", barer: "Matnni kim yozadi", nima_uchun: "Mijoz kiritgan matnni to'g'ridan-to'g'ri chiroyli otkritkaga print qilib qo'shasiz" },
+                    { uid: 'kid19', daraja: "O'rta", muammo: "Homilador ayollar uchun tug'ruqqa tayyorgarlik (Check-list) yo'qligi", oqibat: "Ayollar qayerdan nima olishni bilmay qiynalishi va parchalangan xaridlar", yechim: "Tayyor Raqamli Check-listlar bloki", bito: "Bosh sahifada 'Tug'ruqxona uchun to'liq ro'yxat' degan maqola-tovarlar to'plami", barer: "Ularni yig'ish uzoq", nima_uchun: "Mijoz 1 klikda ro'yxatdagi barcha kerakli narsani savatga solib qo'ya oladi" },
+                    { uid: 'kid20', daraja: "Yuqori", muammo: "Onlayn do'konga nisbatan yosh onalardagi ishonchsizlik", oqibat: "Mijoz xavfsizlik va xizmat sifatidan qo'rqib faqat oflayndan olishi", yechim: "Telegramdagi ochiq Chat/Kanal integratsiyasi", bito: "MiniApp ichida to'g'ridan to'g'ri 'Onalar klubi' Telegram guruhiga havola turishi", barer: "Sotuvga aloqasi", nima_uchun: "Guruhdagi boshqa onalarning sharhlari (Social proof) sotuvni 10 barobarga oshiradi" }
                 ],
                 avto: [
-                    { uid: 'av1', daraja: "Kritik", muammo: "Mijozga qaysi zapchast tushishini aniqlash (VIN kod)", oqibat: "Noto'g'ri detal sotish, mashinaga tushmasligi va vozvrat", yechim: "Model va yil bo'yicha aqlli filtr", bito: "Faqat mashina markasi va yiliga mos qismlar chiqadigan dinamik katalog", barer: "Baza katta", nima_uchun: "Excel orqali ommaviy yuklash va teglash tizimi ishlangan" }
+                    { uid: 'av1', daraja: "Kritik", muammo: "Mijozga qaysi zapchast tushishini aniqlash (VIN kod)", oqibat: "Noto'g'ri detal sotish, mashinaga tushmasligi va vozvrat", yechim: "Model va yil bo'yicha aqlli filtr", bito: "Faqat mashina markasi va yiliga mos qismlar chiqadigan dinamik katalog", barer: "Baza katta", nima_uchun: "Excel orqali ommaviy yuklash va teglash tizimi ishlangan" },
+                    { uid: 'av2', daraja: "Kritik", muammo: "Usta xizmati bilan birga sotish (Okat hisob-kitobi)", oqibat: "Ustalar qancha ulush olganini hisoblab o'tirishdagi xaos", yechim: "Ustalar uchun referal tizim", bito: "Har bir usta uchun alohida havola, kimdan qancha savdo bo'lgani ko'rinadi", barer: "Usta texnika", nima_uchun: "Faqat havola (silka) yuboradi xolos, qolgani avtomat" },
+                    { uid: 'av3', daraja: "Kritik", muammo: "To'plam qilib sotish (Masalan: Moy + Filtr)", oqibat: "Mijoz faqat moy oladi, filtrni boshqa joydan izlaydi", yechim: "Bundle qilib o'rtacha chekni oshirish", bito: "Moy tanlanganda avtomatik 'Bunga tushuvchi filtrlar' taklif qilinadi", barer: "Moslashtirish", nima_uchun: "Kategoriyalarni bog'lash orqali aqlli tavsiyalar yaratiladi" },
+                    { uid: 'av4', daraja: "Yuqori", muammo: "Original va Xitoy (Dublikat) farqini so'rash", oqibat: "Mijoz 'Bu arzon ekan, xitoymi?' deb ishonchsizlik bilan chiqib ketadi", yechim: "Aniq yorliqlar va sertifikatlar", bito: "Har bir tovar yonida 'Original' yoki 'Premium Dublikat' teglari", barer: "O'qimaydi", nima_uchun: "To'g'ri vizual iyerarxiya ishonchni avtomat oshiradi" },
+                    { uid: 'av5', daraja: "Yuqori", muammo: "Katta gabaritli (Kuzov, shina) dostavka muammosi", oqibat: "Kuryer 'Bu mashinamga sig'maydi' deb buyurtmani bekor qiladi", yechim: "Gabaritga qarab avto dostavka narxi", bito: "Katta tovarlarga avtomatik tarzda Yuk avtomobili tarifi qo'shiladi", barer: "Narx", nima_uchun: "Mijoz buni tushunadi va tizimli ishlash xatoliklarni nolga tushiradi" },
+                    { uid: 'av6', daraja: "Yuqori", muammo: "Ulgurji (Optom) xaridorlar bilan ishlash azobi", oqibat: "Har bir viloyatdagi savdogarga alohida narx yuborib charchash", yechim: "B2B yopiq portal, ulgurji narxlar", bito: "Optom xaridorlar uchun tasdiqlangandan so'ng ulgurji narxlarni ko'rsatish", barer: "Boshqalar", nima_uchun: "Maxsus 'Ulgurji xaridor' statusi bilangina shunday narxlar ko'rinadi" },
+                    { uid: 'av7', daraja: "O'rta", muammo: "Moy almashtirish kabi xizmatlarga yozilish xaoslari", oqibat: "Mijoz kelganda navbat bo'lib qolishi va asabiylashish", yechim: "Onlayn bron (Booking) moduli", bito: "Mijoz soat 14:00 ga moy almashtirish va moyning o'zini sotib olib qo'yadi", barer: "Vaqtlar", nima_uchun: "Band qilingan vaqtlar avtomat ravishda yopilib boradi" },
+                    { uid: 'av8', daraja: "O'rta", muammo: "Ehtiyot qismlar nomini xato yozish (Vtulka, sharovoy)", oqibat: "Mijoz to'g'ri nomini bilmay qidiruvda topa olmasligi", yechim: "Aqlli qidiruv va rasm bo'yicha izlash", bito: "Sleng (xalq tilidagi) nomlarni teg sifatida kiritish imkoniyati", barer: "Kiritish", nima_uchun: "1-2 ta eng mashhur nomlar bilan teglash kifoya qiladi" },
+                    { uid: 'av9', daraja: "Kritik", muammo: "Moylar va Suyuqliklarni yetkazib berishdagi qadoq muammosi", oqibat: "Bankasi teshib oqib ketishi va kuryer mashinasini rasvo qilishi", yechim: "Suyuqliklar uchun qat'iy ogohlantirish statusi", bito: "Dostavka chekiga avtomatik 'Suyuqlik - Ehtiyotkorlik bilan tashing' degan maxsus yorliq", barer: "Baribir oqadi", nima_uchun: "Bu kuryerni qonuniy javobgarlikka tortishga va zararni qoplashga yordam beradi" },
+                    { uid: 'av10', daraja: "Yuqori", muammo: "Akumulyator (Batareya)larning kafolat taloni (Garantiya) chalkashligi", oqibat: "Qog'oz yirtilishi yoki sanani adashtirish sababli tortishuv", yechim: "To'liq raqamlashtirilgan kafolat tizimi", bito: "Mijoz profilida Akumulyator olingan sana va kafolat muddati avtomatik saqlanadi", barer: "Mijoz akkaunti", nima_uchun: "Telegram raqam orqali avto-ro'yxatdan o'tkazadi, parol eslab qolish shart emas" },
+                    { uid: 'av11', daraja: "Yuqori", muammo: "Tuning qismlari (Fara, Spoiler) ning mashinada qanday turishini bilmaslik", oqibat: "Rasmiga ishonmay, sotib olgach 'Menga yarashmadi' deb qaytarish", yechim: "Batafsil video va o'rnatilgan holatdagi rasmlar", bito: "Mahsulot sahifasida tuning qismining mashinadagi real videosi yoki 360 modeli", barer: "Joy yetmaydi", nima_uchun: "Platforma yuzlab rasmlarni va videolarni muammosiz ko'tara oladi" },
+                    { uid: 'av12', daraja: "O'rta", muammo: "Eski yoki topilishi qiyin (Na zakaz) zapchastlarni so'rashlari", oqibat: "Tovarni topolmay 'Yo'q ekan' deb mijozni quruq qaytarish", yechim: "Maxsus 'Zakaz qilish' ariza formasi", bito: "Mijoz VIN kod va detal rasmini tashlab izlashga rasmiy so'rov qoldiradi", barer: "Unutib qo'yish", nima_uchun: "Barcha bunday arizalar admin panelda alohida status bilan yig'ilib turadi" },
+                    { uid: 'av13', daraja: "Past", muammo: "Qishki va Yozgi shinalarni (Balon) mavsumdan tashqari saqlash qiyinligi", oqibat: "Mavsumda hamma yopiriladi, keyin esa balonlar omborda pulni muzlatadi", yechim: "Oldindan bron va Mavsumiy chegirma (Push)", bito: "Oktyabrda 'Qishki shinalarni hozir 20% arzon oling' deb ommaviy Push sms", barer: "Hech kim qaramaydi", nima_uchun: "Avtomobil egalari tejamkorlikni juda yaxshi ko'rishadi" },
+                    { uid: 'av14', daraja: "Kritik", muammo: "Avtokimyo (Polirovka, atir) larni ishlatish qoidasini bilmaslik", oqibat: "Noto'g'ri ishlatib, mashina salonini yemirib qo'yishi va janjal qilib kelishi", yechim: "Qadam-ba-qadam raqamli instruksiya", bito: "Tovar ichida 'Ishlatish qoidalari' alohida rang bilan ajratilgan va videoli bo'ladi", barer: "Menejer erinadi", nima_uchun: "Bir marta kiritilgan sifatli kontent yuzlab negativlarning oldini oladi" },
+                    { uid: 'av15', daraja: "Yuqori", muammo: "Xarid qilingan extiyot qismlarni oflayn usta do'koniga yetkazish uzoqligi", oqibat: "Mijoz o'zi borishga erinib, usta tavsiya qilgan arzonini olib qo'yishi", yechim: "To'g'ridan to'g'ri servisga (Ustaxonaga) dostavka", bito: "Buyurtmada 'Boshqa manzilga eltish' va qabul qiluvchi (Usta) raqamini kiritish", barer: "Usta aldaydi", nima_uchun: "To'lovni mijoz qilib qo'ygan bo'ladi, usta faqat tovarni qabul qiladi" },
+                    { uid: 'av16', daraja: "O'rta", muammo: "Avto-elektronika (Magnitola, Registrator) xarakteristikasidagi chalkashlik", oqibat: "Mijoz qaysi xotira, qaysi Android versiyasi ekanini tushunmay rad etishi", yechim: "Aniq va sodda qilib ajratilgan xususiyatlar", bito: "Mahsulot ostida 'Tezkor xotira: 4GB, Xotira: 64GB' tarzida aniq jadval ko'rinishida", barer: "Hammasini yozish", nima_uchun: "Elektronika sohasida aniqlik — sotuvning 80% asosidir" },
+                    { uid: 'av17', daraja: "Past", muammo: "Ishlatilgan (B/U) avtoqismlarni sotishdagi ishonchsizlik", oqibat: "Yaroqsiz detal deb o'ylab, arzon bo'lsa ham xarid qilmaslik", yechim: "Raqamli holat (Sostoyanie) indikatori", bito: "Nomida [B/U - Yaxshi holatda] va tavsifida aniq rasmlari (chiziqlari) ko'rsatiladi", barer: "Sotilmaydi", nima_uchun: "Ochiqlik va halollik orqali aynan arzon qidiruvchi qatlam jalb qilinadi" },
+                    { uid: 'av18', daraja: "Kritik", muammo: "Qimmat amortizator yoki motor qismlari narxi asabni buzishi", oqibat: "Xarajat katta bo'lib ketib, arzon Xitoy nusxasini tanlashi", yechim: "Rassrochka (Muddatli to'lov) integratsiyasi", bito: "Qimmat tovar ostida 'Oyiga 150,000 so'mdan muddatli to'lovga' degan opsiya", barer: "Hujjatbozlik", nima_uchun: "BitoMarketda barchasi onlayn Uzum/Alif API lari orqali avtomatlashadi" },
+                    { uid: 'av19', daraja: "Yuqori", muammo: "Mashinani yuvish (Moyka) xizmatlari uchun vaqt bron qila olmaslik", oqibat: "Katta navbatda turib asabiylashish va mijozning qaytib kelmasligi", yechim: "Soatbay onlayn yozilish (Booking)", bito: "Maxsus 'Xizmatlar' bo'limida bo'sh vaqtlarni ko'rib oldindan band qilib qo'yish", barer: "Boshqasi kelib qolsa", nima_uchun: "Onlayn band qilinganlarga ustuvorlik berilishi VIP status hissini uyg'otadi" },
+                    { uid: 'av20', daraja: "O'rta", muammo: "Moy almashtirish kilometrajini (Probeg) unutib yuborish", oqibat: "Mijoz moy almashtirish muddatini o'tkazib mashinasini buzib qo'yishi", yechim: "Avtomatik e-CRM eslatmalari", bito: "Xariddan 3 oy o'tib 'Sizda moy almashtirish vaqti keldi' deb avtomat eslatma borishi", barer: "Hammaniki har xil", nima_uchun: "O'rtacha statistik vaqt belgilanadi, mijoz bu g'amxo'rlikdan xursand bo'ladi" }
                 ],
                 supermarket: [
-                    { uid: 'sm1', daraja: "Kritik", muammo: "Tarozili (Gramm/KG) mahsulotlar hisobi", oqibat: "Mijozga 'necha gramm kerak?' deb Directda yozishib o'tirish", yechim: "Vaznni tanlash modifikatorlari", bito: "0.5 kg yoki 1 kg ni mijoz kartochkaning o'zidayoq bosib tanlaydi", barer: "Dastur qimmat", nima_uchun: "Katta supermarketlar tizimi obuna asosida arzon narxda beriladi" }
+                    { uid: 'sm1', daraja: "Kritik", muammo: "Tarozili (Gramm/KG) mahsulotlar hisobi", oqibat: "Mijozga 'necha gramm kerak?' deb Directda yozishib o'tirish", yechim: "Vaznni tanlash modifikatorlari", bito: "0.5 kg yoki 1 kg ni mijoz kartochkaning o'zidayoq bosib tanlaydi", barer: "Dastur qimmat", nima_uchun: "Katta supermarketlar tizimi obuna asosida arzon narxda beriladi" },
+                    { uid: 'sm2', daraja: "Kritik", muammo: "Tez ayniydigan mahsulotlar (Srok) nazorati", oqibat: "Sut, kolbasa kabi mahsulotlarning buzilib qolishi va zarar", yechim: "Sroki yaqinlar uchun 'Sale' va Push", bito: "Kechqurunlari 'Aksiya: Barcha pishiriqlar 50% chegirmada' deb sotib yuborish", barer: "Kim o'qiydi", nima_uchun: "Bunday super-chegirmalarni odamlar kutib turib xarid qiladi" },
+                    { uid: 'sm3', daraja: "Kritik", muammo: "Zallardagi uzun navbatlar (Kechki pik vaqtda)", oqibat: "Navbatda turishga asabiylashib, sotib olingan narsalarni tashlab ketish", yechim: "Scan & Go (Navbatsiz xarid)", bito: "Zalda QR ni o'qitadi, telefonda to'laydi va navbatsiz chiqib ketadi", barer: "O'g'rilik", nima_uchun: "Eshikda nazoratchi faqat telefon ekranidagi yashil chekni ko'radi" },
+                    { uid: 'sm4', daraja: "Kritik", muammo: "Kichik cheklar (Faqat bitta narsa olish) muammosi", oqibat: "Dostavka xarajati mahsulot narxidan qimmat bo'lib qolishi", yechim: "Minimal buyurtma summasi", bito: "Tizimga 'Minimal xarid - 50 000 so'm' qoidasini kiritish", barer: "Qochishi", nima_uchun: "Mijoz noiloj chekni to'ldirish uchun shirinlik yoki sharbat qo'shadi" },
+                    { uid: 'sm5', daraja: "Yuqori", muammo: "Savatning juda ko'p mayda tovarlardan iboratligi", oqibat: "Yuzlab tovarlarni qidirish qiyinligidan mijozning erinib ketishi", yechim: "Aqlli va tezkor qidiruv", bito: "Katalogda tovarlar shunday joylashganki, 10 ta maxsulotni 1 minutda yig'adi", barer: "Rasmlar", nima_uchun: "Telegram platformasining o'zi rasmlarni keshlash xususiyatiga ega" },
+                    { uid: 'sm6', daraja: "Yuqori", muammo: "Mahsulotlarning yo'lda ezilishi/erishi (Muzqaymoq)", oqibat: "Yumshoq non ostida kartoshka ezilishi va negativ", yechim: "Qadoqlash standartlari ro'yxati", bito: "Dostavka chekiga 'Nozik tovar, alohida paketga soling' deb avtomat yoziladi", barer: "Kuryer", nima_uchun: "Standartlashtirilgan jarayon kuryerni ham intizomga o'rgatadi" },
+                    { uid: 'sm7', daraja: "Yuqori", muammo: "Bonus va skidka kartalarini uyda unutib qoldirish", oqibat: "Mijoz chegirma ololmay norozi bo'lishi", yechim: "Virtual sodiqlik (Loyalty) kartasi", bito: "Mijozning telefondagi MiniApp o'zi uning bonus kartasi hisoblanadi", barer: "Kassir", nima_uchun: "Telefondagi shtrix kodni kassir oddiy skaner orqali o'qiydi" },
+                    { uid: 'sm8', daraja: "O'rta", muammo: "Sodda va ko'p takrorlanadigan xaridlar (Non, suv)", oqibat: "Har safar bir xil narsani izlash zerikarli", yechim: "Doimiy xarid tugmasi (Reorder)", bito: "Oldingi safar qilingan 15 talik ro'yxatni 1 klikda yana savatga solish", barer: "Moslashuv", nima_uchun: "Mijozning shaxsiy kabinetida uning butun tarixi saqlanadi" },
+                    { uid: 'sm9', daraja: "Kritik", muammo: "Alkogol va energetik ichimliklarni yosh bolalarga sotish xavfi", oqibat: "Nazorat organlari tomonidan katta jarima va litsenziya tortib olinishi", yechim: "Yoshni tasdiqlash pop-up oynasi", bito: "Taqiqlangan kategoriyaga kirganda 'Siz 20 yoshga to'lganmisiz?' deb so'rash", barer: "Mijoz aldaydi", nima_uchun: "Raqamli ogohlantirish sotuvchidan javobgarlikni mijozga o'tkazadi" },
+                    { uid: 'sm10', daraja: "Yuqori", muammo: "Go'sht va pishloqlarning qanday kesilishini tushuntira olmaslik", oqibat: "Mijozga butun go'sht borsa 'Menga mayda kesilgani kerak edi' deb e'tiroz qilishi", yechim: "Xarid paytida qadoqlash modifikatorlari", bito: "Tovarni tanlaganda ostida 'Butunligicha', 'Bo'laklangan', 'Farsh qilingan' variantlari", barer: "Kassir unutadi", nima_uchun: "Buyurtma chekida bu ma'lumot qip-qizil bo'lib yaqqol ajralib turadi" },
+                    { uid: 'sm11', daraja: "O'rta", muammo: "Retseptlar (Palov, Manti) uchun tovarlarni bir-bir terish qiyinligi", oqibat: "Mijoz sabzi va guruchni alohida izlashdan charchab saytdan chiqib ketishi", yechim: "Tayyor retsept to'plamlari (Bundles)", bito: "'Palov uchun hamma narsa' degan tayyor to'plam yasash va bir marta bosish orqali olish", barer: "Guruch o'zida borsa", nima_uchun: "Savatga o'tgach keraksizini osongina o'chirib tashlay oladi" },
+                    { uid: 'sm12', daraja: "Yuqori", muammo: "Uy hayvonlari (Mushuk/Kuchuk) oziq-ovqatini esdan chiqarish", oqibat: "Kechqurun uyga kelganda ovqat yo'qligini bilib asabiylashish", yechim: "Takroriy xaridlarni avtomatlashtirish (Obuna)", bito: "Mijozlarga oziq-ovqat tugash arafasida (har 2 haftada) avtomatik Telegram xabar borishi", barer: "Qanday ulanadi", nima_uchun: "BitoMarketning ichki CRM tizimi mijozning xarid odatini o'zi o'rganadi" },
+                    { uid: 'sm13', daraja: "Kritik", muammo: "Halol va Kosher mahsulotlarni izlashdagi qiyinchilik", oqibat: "Musulmon yoki dindor mijozlar ishonchsizlik bilan kolbasalarni olmay ketishi", yechim: "Ishonch teglari va filtrlari", bito: "Mahsulot nomlari yoniga aniq o'qiladigan yashil 'HALOL 100%' belgisini o'rnatish", barer: "Boshqalar olmasa-chi", nima_uchun: "Sifat kafolati barcha turdagi xaridorlarda qo'shimcha ishonch uyg'otadi" },
+                    { uid: 'sm14', daraja: "O'rta", muammo: "Og'ir tovarlarni (10 litr suv, qop un) do'kondan uyga tashish azobi", oqibat: "Katta va og'ir xaridlar uchun bozorga borish, supermarketdan olmaslik", yechim: "Og'ir tovarlar bo'yicha arzon dostavka tariflari", bito: "Bosh sahifada 'Og'ir yukni biz tashiymiz' degan banner va maxsus kategoriya", barer: "Kuryerga og'ir", nima_uchun: "Yuk mashinalari (Masalan Yandex.Cargo) bilan osongina integratsiya qilish" },
+                    { uid: 'sm15', daraja: "Past", muammo: "Faqat bir xil markadagi choy yoki kofega qotib qolish", oqibat: "Aslida mazaliroq, yangi brendli mahsulotlarning omborda chang bosib yotishi", yechim: "Degustatsiya va tavsiyalar bloki", bito: "Savatda 'Ko'pchilik buni ham olmoqda' deya yangi kofeni taklif etuvchi aqlli blok", barer: "Narxi qimmat", nima_uchun: "Bu odamlarda har doim yangilikka bo'lgan qiziqish hissini rag'batlantiradi" },
+                    { uid: 'sm16', daraja: "Kritik", muammo: "Oziq-ovqatlarda mahalliy va import (Rossiya) tovarlarini ajratish xatosi", oqibat: "Mijoz mahalliy un ekan deb olib, xitoy unini qo'liga olgach norozi bo'lishi", yechim: "Ishlab chiqaruvchi davlat (Bayroqchalar) ko'rsatkichi", bito: "Katalogda tovar nomi yoniga kichik, chiroyli davlat bayroqlarini joylashtirish", barer: "Dizaynni to'ldirib yuboradi", nima_uchun: "Yo'q, emoji formatidagi yorliqlar juda estetik va foydali ma'lumot beradi" },
+                    { uid: 'sm17', daraja: "Yuqori", muammo: "Paketlarga solish (Upakovka) limitining yo'qligi", oqibat: "Kuryer hamma narsani bitta katta paketga solib, kimyoviy moddalarni nonga aralashtirishi", yechim: "Tizimli tovarlarni ajratish (Packing rules)", bito: "Savatda avtomatik ravishda Oziq-ovqat va Xo'jalik mollari (Ximiya) uchun alohida paket haqi qo'shilishi", barer: "Mijoz paketga pul to'lamaydi", nima_uchun: "Mijozning o'zi sog'ligi uchun alohida o'ralganini ko'rib, sifatdan xursand bo'ladi" },
+                    { uid: 'sm18', daraja: "O'rta", muammo: "Tandir (Novvoyxona) mahsulotlarining issiq chiqish vaqtini bilmaslik", oqibat: "Non sovuq ekan deb, ertasi kuni mijozning do'konga kirmay qolishi", yechim: "Tandir jadvallari va Taymerlar", bito: "Issiq non kategoriyasida 'Yangi partiya chiqishiga: 15 minut qoldi' yozuvi", barer: "Kuzatish qiyin", nima_uchun: "Nonvoy grafikasi (kuniga 3 mahal) tizimga bir marta dasturlanadi" },
+                    { uid: 'sm19', daraja: "Past", muammo: "Ekologik sof va Diabetiklarga mos tovarlarni alohida topolmaslik", oqibat: "Sog'lom ovqatlanuvchi insonlarning bu tizimni faqat zararli narsalar deb o'ylashi", yechim: "Dietologik va Organik kategoriyalar", bito: "Maxsus 'Sog'lom Ovqatlanish' (PP) katalogi, diabetik shokoladlar va organik mevalar", barer: "Kam sotiladi", nima_uchun: "Aynan shu bo'limdagi xaridorlarning o'rtacha cheki (AOV) boshqalardan 2 marta baland" },
+                    { uid: 'sm20', daraja: "Kritik", muammo: "Supermarketdagi aksiyalarning (Sariq sennik) onlaynga tushmasligi", oqibat: "Odamlar oflaynda skidka bor deb onlayndan olmay to'g'ri do'konga kelishi", yechim: "Oflayn va Onlayn Yagona narx sinxronizatsiyasi", bito: "Oflayn kassada narx tushdimi, shu zahoti BitoMarketda ham ustiga chizilib 'Aksiya' yozuvi yonadi", barer: "Integratsiya murakkab", nima_uchun: "BitoMarketning kuchli API arxitekturasi 1C kabi buxgalteriya tizimlari bilan tezkor ulanadi" }
                 ]
             },
             hiddenItemIds: [],
@@ -632,7 +797,6 @@
         const vueApp = createApp({
             data() {
                 return {
-                    user: null,
                     isInitialized: false,
                     isSaving: false,
                     saveTimeout: null,
@@ -657,12 +821,6 @@
                     newItem: {
                         uid: '', category: 'umumiy', daraja: 'Kritik', muammo: '', oqibat: '', belgi: '', ta_sir: '', yechim: '', bito: '', barer: '', nima_uchun: ''
                     },
-                    
-                    // AI State variables
-                    scriptPrompt: '',
-                    isGeneratingScript: false,
-                    isGeneratingSPIN: false,
-                    scriptError: '',
 
                     categories: [],
                     scripts: {},
@@ -672,21 +830,7 @@
                 };
             },
             mounted() {
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                };
-                initAuth();
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        this.user = user;
-                        this.loadDataFromFirebase();
-                    }
-                });
+                this.loadDataLocally();
             },
             computed: {
                 isScriptTab() { return this.activeTab === 'hotCall' || this.activeTab === 'coldCall'; },
@@ -710,7 +854,6 @@
                     if (this.isScriptTab) return []; 
 
                     let result = [];
-                    // Har bir elementga qaysi kategoriyada turganini (katalog ID) biriktiramiz
                     for (let cat in this.data) {
                         this.data[cat].forEach(item => { item._categoryId = cat; });
                     }
@@ -735,53 +878,50 @@
                 }
             },
             methods: {
-                loadDataFromFirebase() {
-                    const docRef = doc(db, 'artifacts', appId, 'users', this.user.uid, 'bitoMarketData', 'main');
-                    onSnapshot(docRef, (docSnap) => {
-                        if (docSnap.exists()) {
-                            if (!docSnap.metadata.hasPendingWrites) {
-                                const fbData = docSnap.data();
-                                this.categories = fbData.categories || INITIAL_STATE.categories;
-                                this.scripts = fbData.scripts || INITIAL_STATE.scripts;
-                                this.data = fbData.data || INITIAL_STATE.data;
-                                this.hiddenItemIds = fbData.hiddenItemIds || [];
-                                this.deletedItemIds = fbData.deletedItemIds || [];
-                                this.isInitialized = true;
-                            }
-                        } else {
-                            this.categories = INITIAL_STATE.categories;
-                            this.scripts = INITIAL_STATE.scripts;
-                            this.data = INITIAL_STATE.data;
-                            this.hiddenItemIds = [];
-                            this.deletedItemIds = [];
-                            this.saveData();
-                            this.isInitialized = true;
-                        }
-                    }, (error) => { console.error("Firebase Xatolik:", error); });
+                loadDataLocally() {
+                    const savedData = localStorage.getItem('bitoMarketData');
+                    if (savedData) {
+                        const parsedData = JSON.parse(savedData);
+                        this.categories = parsedData.categories || INITIAL_STATE.categories;
+                        this.scripts = parsedData.scripts || INITIAL_STATE.scripts;
+                        this.data = parsedData.data || INITIAL_STATE.data;
+                        this.hiddenItemIds = parsedData.hiddenItemIds || [];
+                        this.deletedItemIds = parsedData.deletedItemIds || [];
+                    } else {
+                        // First time load
+                        this.categories = INITIAL_STATE.categories;
+                        this.scripts = INITIAL_STATE.scripts;
+                        this.data = INITIAL_STATE.data;
+                        this.hiddenItemIds = [];
+                        this.deletedItemIds = [];
+                        this.saveDataLocally();
+                    }
+                    this.isInitialized = true;
                 },
-                saveData() {
-                    if (!this.user) return;
+                saveDataLocally() {
                     this.isSaving = true;
+                    
                     const cleanedData = JSON.parse(JSON.stringify(this.data));
                     for (let cat in cleanedData) {
                         cleanedData[cat].forEach(item => { delete item._categoryId; });
                     }
-                    
-                    const docRef = doc(db, 'artifacts', appId, 'users', this.user.uid, 'bitoMarketData', 'main');
-                    setDoc(docRef, {
+
+                    const stateToSave = {
                         categories: this.categories,
                         scripts: this.scripts,
                         data: cleanedData,
                         hiddenItemIds: this.hiddenItemIds,
                         deletedItemIds: this.deletedItemIds
-                    }).then(() => {
-                        setTimeout(() => { this.isSaving = false; }, 500);
-                    });
+                    };
+
+                    localStorage.setItem('bitoMarketData', JSON.stringify(stateToSave));
+                    
+                    setTimeout(() => { this.isSaving = false; }, 300);
                 },
                 debouncedSave() {
                     clearTimeout(this.saveTimeout);
                     this.isSaving = true;
-                    this.saveTimeout = setTimeout(() => { this.saveData(); }, 1000);
+                    this.saveTimeout = setTimeout(() => { this.saveDataLocally(); }, 500);
                 },
                 changeTab(tabId) {
                     this.activeTab = tabId;
@@ -797,7 +937,7 @@
                     const index = this.hiddenItemIds.indexOf(item.uid);
                     if (index > -1) this.hiddenItemIds.splice(index, 1);
                     else this.hiddenItemIds.push(item.uid);
-                    this.saveData();
+                    this.saveDataLocally();
                 },
                 isHidden(item) { return this.hiddenItemIds.includes(item.uid); },
                 initDelete(item) {
@@ -807,7 +947,7 @@
                 confirmDelete() {
                     if (this.itemToDelete && !this.deletedItemIds.includes(this.itemToDelete.uid)) {
                         this.deletedItemIds.push(this.itemToDelete.uid);
-                        this.saveData();
+                        this.saveDataLocally();
                     }
                     this.showDeleteModal = false;
                     this.itemToDelete = null;
@@ -817,7 +957,7 @@
                     const index = this.deletedItemIds.indexOf(item.uid);
                     if (index > -1) {
                         this.deletedItemIds.splice(index, 1);
-                        this.saveData();
+                        this.saveDataLocally();
                     }
                 },
                 permanentDelete(item) {
@@ -829,7 +969,7 @@
                     if (dIndex > -1) this.deletedItemIds.splice(dIndex, 1);
                     const hIndex = this.hiddenItemIds.indexOf(item.uid);
                     if (hIndex > -1) this.hiddenItemIds.splice(hIndex, 1);
-                    this.saveData();
+                    this.saveDataLocally();
                 },
                 saveNewCategory() {
                     if (!this.newCategoryName.trim()) return;
@@ -841,7 +981,7 @@
                     this.data[newId] = []; 
                     this.newCategoryName = '';
                     this.showAddCategoryModal = false;
-                    this.saveData();
+                    this.saveDataLocally();
                     this.changeTab(newId);
                 },
                 confirmDeleteCategory() {
@@ -849,11 +989,10 @@
                     if (index > -1) this.categories.splice(index, 1);
                     delete this.data[this.activeTab];
                     this.showDeleteCatModal = false;
-                    this.saveData();
+                    this.saveDataLocally();
                     this.changeTab('umumiy');
                 },
 
-                // QO'SHISH VA TAHRIRLASH (EDIT) LOGIKASI
                 openAddModal() {
                     this.formError = '';
                     this.isEditing = false;
@@ -868,7 +1007,6 @@
                 openEditModal(item) {
                     this.formError = '';
                     this.isEditing = true;
-                    // Saqlash paytida eski joyidan o'chirish uchun asli kategoriyasini eslab qolamiz
                     this.editingOriginalCategory = item._categoryId; 
                     
                     this.newItem = {
@@ -906,7 +1044,6 @@
                         yechim: this.newItem.yechim,
                     };
 
-                    // Umumiy tabdagi ro'yxat tuzilishi alohida formatni talab qiladi
                     if (this.newItem.category === 'umumiy') {
                         itemToSave.belgi = this.newItem.belgi;
                         itemToSave.ta_sir = this.newItem.ta_sir;
@@ -917,7 +1054,6 @@
                         itemToSave.nima_uchun = this.newItem.nima_uchun;
                     }
 
-                    // Agar tahrirlanayotgan bo'lsa, eskisini o'chirib tashlaymiz
                     if (this.isEditing && this.data[this.editingOriginalCategory]) {
                         const oldIndex = this.data[this.editingOriginalCategory].findIndex(i => i.uid === itemToSave.uid);
                         if (oldIndex > -1) {
@@ -925,7 +1061,6 @@
                         }
                     }
 
-                    // Yangi (yoki tahrirlangan) ma'lumotni kiritish
                     if (!this.data[this.newItem.category]) {
                         this.data[this.newItem.category] = [];
                     }
@@ -933,7 +1068,7 @@
 
                     this.showAddModal = false;
                     this.isEditing = false;
-                    this.saveData();
+                    this.saveDataLocally();
                     
                     if(this.activeTab !== this.newItem.category && this.activeTab !== 'hidden' && this.activeTab !== 'trash') {
                         this.changeTab(this.newItem.category);
@@ -944,126 +1079,12 @@
                 addScriptBlock(tab) {
                     const newId = Date.now();
                     this.scripts[tab].push({ id: newId, role: 'seller', text: '' });
-                    this.saveData();
+                    this.saveDataLocally();
                 },
                 deleteScriptBlock(tab, index) {
                     this.scripts[tab].splice(index, 1);
-                    this.saveData();
+                    this.saveDataLocally();
                 },
-
-                // --- AI (GEMINI LLM) INTEGRATION LOGIC ---
-                async callGemini(prompt, schema) {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                    const payload = {
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: {
-                            responseMimeType: "application/json",
-                            responseSchema: schema
-                        }
-                    };
-                    
-                    let retries = 5;
-                    for (let i = 0; i < retries; i++) {
-                        try {
-                            const response = await fetch(url, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify(payload)
-                            });
-                            if (!response.ok) throw new Error("API Network Error");
-                            const data = await response.json();
-                            return JSON.parse(data.candidates[0].content.parts[0].text);
-                        } catch (e) {
-                            if (i === retries - 1) throw e;
-                            await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
-                        }
-                    }
-                },
-                
-                async generateSPINAI() {
-                    if (!this.newItem.muammo) return;
-                    this.isGeneratingSPIN = true;
-                    this.formError = '';
-                    
-                    const prompt = `Men "BitoMarket" nomli e-commerce Telegram MiniApp platformasi uchun sotuv SPIN qolipini yozyapman. Tizim avtomatizatsiyani ta'minlaydi. Mijozning hozirgi og'riqli muammosi: "${this.newItem.muammo}". Iltimos, shu muammoni tahlil qilib, quyidagi qismlarni O'ZBEK tilida JSON shaklida to'ldirib bering:
-                    1. oqibat: Bu muammo hal qilinmasa biznesga nima salbiy ta'sir qiladi (Simptom)?
-                    2. yechim: Ideal raqamli yoki nazariy yechim qanday bo'lishi kerak?
-                    3. bito: BitoMarket bu muammoni qanday hal qiladi (bot, CRM, yagona baza, 24/7 buyurtma va hk)?
-                    4. barer: Mijozda BitoMarket yechimini olish uchun qanday keng tarqalgan e'tiroz yoki qo'rquv bo'lishi mumkin (masalan: qimmat, o'rganish qiyin va hk)?
-                    5. nima_uchun: Ushbu e'tirozni yopib, BitoMarketni eng zo'r tanlov ekanini qisqacha asoslang.`;
-                    
-                    const schema = {
-                        type: "OBJECT",
-                        properties: {
-                            oqibat: { type: "STRING" },
-                            yechim: { type: "STRING" },
-                            bito: { type: "STRING" },
-                            barer: { type: "STRING" },
-                            nima_uchun: { type: "STRING" }
-                        },
-                        required: ["oqibat", "yechim", "bito", "barer", "nima_uchun"]
-                    };
-
-                    try {
-                        const result = await this.callGemini(prompt, schema);
-                        // Kategoriya tipiga qarab o'zgaruvchilarni to'g'ri bog'lash
-                        if (this.newItem.category === 'umumiy') {
-                            this.newItem.belgi = result.oqibat || '';
-                            this.newItem.ta_sir = result.oqibat || '';
-                        } else {
-                            this.newItem.oqibat = result.oqibat || '';
-                        }
-                        this.newItem.yechim = result.yechim || '';
-                        this.newItem.bito = result.bito || '';
-                        this.newItem.barer = result.barer || '';
-                        this.newItem.nima_uchun = result.nima_uchun || '';
-                    } catch (err) {
-                        this.formError = "AI generatsiyasida xatolik yuz berdi. Iltimos, qayta urinib ko'ring.";
-                    } finally {
-                        this.isGeneratingSPIN = false;
-                    }
-                },
-                
-                async generateScriptAI(tab) {
-                    if (!this.scriptPrompt) return;
-                    this.isGeneratingScript = true;
-                    this.scriptError = '';
-                    
-                    const prompt = `Iltimos, "Sotuvchi" (BitoMarket e-commerce platformasi vakili) va "Mijoz" o'rtasida realistik sotuv skripti (dialog) yozib bering. Holat / Muammo: "${this.scriptPrompt}". Suhbat tabiiy, ishontiruvchi bo'lsin va 4-8 ta gapdan iborat bo'lsin. Barcha dialoglar sof O'ZBEK tilida bo'lishi shart. JSON array qaytaring. Har bir qator "role" ("seller" yoki "client") va "text" dan iborat bo'lsin.`;
-                    
-                    const schema = {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: {
-                                role: { type: "STRING", enum: ["seller", "client"] },
-                                text: { type: "STRING" }
-                            },
-                            required: ["role", "text"]
-                        }
-                    };
-
-                    try {
-                        const scriptItems = await this.callGemini(prompt, schema);
-                        const newBlocks = scriptItems.map(item => ({
-                            id: Date.now() + Math.random(),
-                            role: item.role,
-                            text: item.text
-                        }));
-                        
-                        if (!this.scripts[tab]) {
-                            this.scripts[tab] = [];
-                        }
-                        this.scripts[tab].push(...newBlocks);
-                        this.scriptPrompt = '';
-                        this.saveData();
-                    } catch (err) {
-                        this.scriptError = "AI orqali skript yaratishda uzilish bo'ldi. Tarmoqni tekshirib qayta bosing.";
-                    } finally {
-                        this.isGeneratingScript = false;
-                    }
-                },
-
                 getActiveCount(catId) {
                     if(!this.data[catId]) return 0;
                     return this.data[catId].filter(item => !this.isHidden(item) && !this.isDeleted(item)).length;
